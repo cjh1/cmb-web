@@ -1,0 +1,1 @@
+angular.module('chpc.workflow.mpas-ocean', ['girder.net', 'ui.bootstrap']);

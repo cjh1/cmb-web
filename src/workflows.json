@@ -1,0 +1,13 @@
+{
+    "default" : {
+        "iconText" : "hpc"
+    },
+    "hydra-ne" : {
+        "icon" : "fa-share-alt",
+        "title": "Nuclear Energy"
+    },
+    "mpas-ocean": {
+        "icon" : "fa-globe",
+        "title": "Ocean Simulation"
+    }
+}

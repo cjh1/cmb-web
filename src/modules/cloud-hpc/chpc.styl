@@ -1,0 +1,68 @@
+color-lightest    = #eee
+color-lighter     = #bebebe
+color-light       = #8f8f8f
+color-dark        = #252525
+color-darker      = #040303
+color-outline     = #0b69bd
+color-hover-blue  = #7777EE
+color-hover-green = #42D305
+color-hover-red   = #D34205
+color-error       = #d9534f
+
+*[ng-click]
+    cursor pointer
+    user-select none
+
+html, body
+    padding 0
+    margin 0
+
+.clickable
+    cursor pointer
+    user-select none
+    margin 0 5px
+
+.header
+    background color-darker
+    color white
+    line-height 2em
+    padding 5px 10px
+
+    .title
+        color color-darker
+        font-size 0.8em
+
+    div
+        display inline-block
+
+    .clickable.red:hover
+        color color-hover-red
+
+    .clickable.green:hover
+        color color-hover-green
+
+    .clickable.blue:hover
+        color color-hover-blue
+
+    input
+        color black
+        line-height normal
+        border-radius 3px
+        padding 3px 6px
+        border none
+        margin 0 5px
+        background-color color-lightest
+
+        &:hover
+            background-color white
+
+        &:focus
+            outline-width 0
+            box-shadow 0px 0px 0pt 2pt color-outline
+
+        &.error
+            background-color color-error
+            color black
+
+.breadcrumb
+    margin-bottom 0

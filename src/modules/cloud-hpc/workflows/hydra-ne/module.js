@@ -1,0 +1,1 @@
+angular.module('chpc.workflow.hydra-ne', ['girder.net', 'ui.bootstrap']);

@@ -1,0 +1,93 @@
+<!doctype html>
+<html ng-app="chpc" ng-controller="chpc.main.RootController">
+  <head>
+    <meta charset="utf-8">
+    <title>Cloud HPC</title>
+    <meta name="description" content="Leverage cloud resources to do parallel computation and visualization.">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="css/vendors.css">
+    <link rel="stylesheet" href="css/chpc-min.css">
+  </head>
+  <body>
+    <!--[if lt IE 10]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+    <div class="header">
+        <span class="fa fa-stack">
+            <i class="fa fa-cloud fa-stack-2x"></i>
+            <i class="fa fa-stack-1x title" ng-class="workflowsMeta[workflowType].icon">
+                {{ workflowsMeta[workflowType].iconText }}
+            </i>
+        </span>
+        {{ workflowsMeta[workflowType].title }}
+        <div chpc-login-panel class="pull-right">
+        </div>
+    </div>
+    <ol class="breadcrumb">
+        <li ng-repeat='name in navigationPath'><span class='clickable fa {{ navigationIcones[name] }}' ng-click='updateNavigation(name)'></span></li>
+    </ol>
+
+    <div class="content">
+        <p ng-hide="user" class="text-center" style="margin: 5%;">
+            <span class="fa-5x fa-stack">
+                <i class="fa fa-cloud fa-stack-2x"></i>
+                <b class="fa fa-stack-1x" style="color: white;">?</b>
+            </span>
+            <br/>
+            You must login to perform any online simulation.
+        </p>
+
+        <div ng-if="user && navigationState == 'workflows'">
+            <div class="worflow-block"
+                ng-repeat="collection in workflows"
+                ng-click="selectWorkflow(collection.name)">
+                <div class="title">{{ workflowsMeta[collection.name].title }}</div>
+                <div class="description">{{ collection.description }}</div>
+                <div class="action">
+                    <i class="fa fa-cloud-download"></i>
+                </div>
+            </div>
+        </div>
+
+        <div ng-if="user && navigationState == 'workflow'">
+            <table  class='table table-striped table-hover table-condensed'
+                    ng-repeat="group in groups">
+                <thead>
+                    <tr>
+                        <th>
+                            <i class="fa fa-database fa-fw"></i>
+                        </th>
+                        <th style='width: 20%;'>
+                            {{ group.name === user.login ? "My projects" : group.name }}
+                        </th>
+                        <th style='width: 60%;'></th>
+                        <th style='width: 20%;'></th>
+                        <th class='text-right' ng-click='createProject(group._id)'>
+                            <i class="fa fa-plus"></i>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="project in projects"
+                        ng-if="project.parentId === group._id"
+                        class="project-block">
+                        <td></td>
+                        <td ng-click='selectProject(project._id)'>{{ project.name }}</td>
+                        <td ng-click='selectProject(project._id)'>{{ project.description }}</td>
+                        <td ng-click='selectProject(project._id)'>{{ project.created | toDateNumber | date : 'medium' }}</td>
+                        <td class='text-right' ng-click='deleteProject(project._id)'>
+                            <i class='fa fa-trash'></i>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <project-view ng-if="user && navigationState == 'project'"></project-view>
+    </div>
+
+    <script src="js/vendors.js"></script>
+    <script src="js/chpc-min.js"></script>
+    <script src="js/chpc-tpl.js"></script>
+  </body>
+</html>
