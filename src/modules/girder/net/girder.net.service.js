@@ -164,11 +164,19 @@ angular.module("girder.net", [])
         };
 
         /**
-         * Return a promise which should provide the list of available projects
-         * within a group.
+         * Return a promise which should provide the list of available folders
+         * within a folder.
          */
-        this.listGroupProjects = function ( groupId ) {
-            return this.get('folder?parentType=folder&parentId=' + groupId);
+        this.listFolders = function ( parentId ) {
+            return this.get('folder?parentType=folder&parentId=' + parentId);
+        };
+
+        /**
+         * Return a promise which should provide the list of available items
+         * within a folder.
+         */
+        this.listItems = function ( parentId ) {
+            return this.get('item?folderId=' + parentId);
         };
 
         this.createFolder = function (parentId, name, description) {

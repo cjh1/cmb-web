@@ -124,7 +124,7 @@ angular.module('chpc.main')
                     };
 
                 while(count--) {
-                    $network.listGroupProjects(array[count]._id).success(addGroupProjects);
+                    $network.listFolders(array[count]._id).success(addGroupProjects);
                 }
                 $scope.projects = projectsMap;
                 $scope.updateNavigation('workflow');
@@ -144,8 +144,8 @@ angular.module('chpc.main')
          */
         $scope.createProject = function (groupId) {
             var modalInstance = $modal.open({
-                    template: $templateCache.get('cloud-hpc/workflows/hydra-ne/chpc.hydra-ne.create.project.html'),
-                    controller: 'HydraNeCreateProjectCtrl',
+                    template: $templateCache.get($scope.workflowsMeta[$scope.workflowType].template),
+                    controller: $scope.workflowsMeta[$scope.workflowType].controller,
                     size: 'lg',
                     resolve: {
                         group: function() {

@@ -3,8 +3,11 @@
         "iconText" : "hpc"
     },
     "hydra-ne" : {
-        "icon" : "fa-share-alt",
-        "title": "Nuclear Energy"
+        "icon"      : "fa-share-alt",
+        "title"     : "Nuclear Energy",
+        "template"  : "cloud-hpc/workflows/hydra-ne/chpc.hydra-ne.create.project.html",
+        "controller": "HydraNeCreateProjectCtrl",
+        "smtk": "assets/Hydra_Template.json"
     },
     "mpas-ocean": {
         "icon" : "fa-globe",
