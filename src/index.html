@@ -76,7 +76,7 @@
                         <td ng-click='selectProject(project._id)'>{{ project.description }}</td>
                         <td ng-click='selectProject(project._id)'>{{ project.created | toDateNumber | date : 'medium' }}</td>
                         <td class='text-right' ng-click='deleteProject(project._id)'>
-                            <i class='fa fa-trash'></i>
+                            <i class='fa fa-trash' ng-if='project._accessLevel == 2'></i>
                         </td>
                     </tr>
                 </tbody>
