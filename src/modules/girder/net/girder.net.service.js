@@ -116,8 +116,8 @@ angular.module("girder.net", [])
          * Perform a PUT http call to the given url with
          * the authentication Token if available.
          */
-        this.put = function (url) {
-            return $http(generateHttpConfig('PUT', url));
+        this.put = function (url, data) {
+            return $http(generateHttpConfig('PUT', url, data));
         };
 
         /**
@@ -185,6 +185,22 @@ angular.module("girder.net", [])
 
         this.deleteFolder = function (id) {
             return this.delete('folder/' + id);
+        };
+
+        this.createItem = function (folderId, name, description, metadata) {
+            var that = this,
+                promise = this.post(['item?folderId=', folderId, '&name=', escape(name), '&description=', escape(description)].join(''));
+            if(metadata) {
+                promise
+                .success(function(newItem) {
+                    return that.put('item/' + newItem._id + '/metadata', metadata);
+                })
+                .error(function(){
+                    console.log('Error while creating item');
+                    return promise; 
+                });
+            } 
+            return promise;
         };
 
     }]);

@@ -1,0 +1,30 @@
+<div class="navigation">
+   <div class="bs-docs-sidebar affix">
+      <ul class="nav">
+         <li class="active" ng-click="activate('mat')">Materials</li>
+         <li ng-click="activate('source')">Source Terms</li>
+         <li ng-click="activate('exec')">Execution</li>
+         <li ng-click="activate('def')">Problem Definition</li>
+         <li ng-click="activate('solv')">Solvers</li>
+         <li ng-click="activate('stat')">Statistics</li>
+         <li ng-click="activate('boundCond')">Boundary Conditions</li>
+         <li ng-click="activate('func')">Functions</li>
+      </ul>
+   </div>
+</div>
+
+<div class='body' ng-if="activeSection == 'mat'">
+   Mat content
+</div>
+
+<div class='body' ng-if="activeSection == 'source'">
+   source content
+</div>
+
+<div class='body' ng-if="activeSection == 'exec'">
+   Exec content
+</div>
+
+<div class='body' ng-if="activeSection == 'def'">
+   definition content
+</div>

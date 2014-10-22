@@ -1,0 +1,44 @@
+<div class="modal-header">
+    <h3 class="modal-title">Create a Simulation for {{ title }}</h3>
+</div>
+<div class="modal-body">
+    <form class="form-horizontal" role="form">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">
+                Name
+            </label>
+            <div class="col-sm-10">
+              <input type="text"
+                ng-model='form.name'
+                class="form-control"
+                placeholder="Your project name">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">
+                Description
+            </label>
+            <div class="col-sm-10">
+              <textarea type="text"
+                ng-model='form.description'
+                class="form-control"
+                placeholder="Your project description"></textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">
+                Analysis type
+            </label>
+            <div class="col-sm-10">
+            	<select ng-model='form.analysis' class="form-control">
+            		<option value='navier-strokes'>Incompressible Navier-Stokes Analysis</option>
+            		<option value='energy'>NS and Energy Equation Analysis</option>
+            	</select>
+        </div>
+    </form>
+
+</div>
+<div class="modal-footer">
+    <button class="btn btn-default" ng-click="ok()">Create</button>
+    <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+</div>
