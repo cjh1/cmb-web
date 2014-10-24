@@ -11,15 +11,21 @@ angular.module('chpc.workflow.hydra-ne')
     $scope.form = {group:group};
 
     $scope.ok = function () {
-
-
         // Create folder and item with mesh inside
         $girder.createFolder($scope.form.group, $scope.form.name, $scope.form.description)
-            .success(function (data) {
-                console.log('create folder');
-                console.log(data);
+            .success(function (folder) {
+                $girder.createItem(folder._id, "mesh", "Mesh file used for simulation")
+                    .success(function (item) {
+                        $girder.uploadFileItem(item._id, $scope.form.mesh, {
+                            name: "mesh.dat"
+                        });
+                    })
+                    .error(function (data) {
+                        console.warn('Could not create mesh item');
+                        console.warn(data);
+                    });
 
-                $modalInstance.close(data);
+                $modalInstance.close(folder);
             })
             .error(function (data, status, headers, config) {
                 console.log('creation failed');

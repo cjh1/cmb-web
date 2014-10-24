@@ -13,7 +13,9 @@ angular.module("girder.net", [])
 
         // Helper function use to generate $http argument base on
         // the targetted method and URL.
-        function generateHttpConfig (method, url, data) {
+        function generateHttpConfig (method, url, data, config) {
+            config = config || {};
+
             // Create basic request config
             var httpConfig = {
                 method: method,
@@ -27,6 +29,24 @@ angular.module("girder.net", [])
             // Add authentication token if available
             if (authToken) {
                 httpConfig.headers = { 'Girder-Token' : authToken };
+            }
+
+            // Add extra configuration directives if present.  If one of the
+            // options is "headers", *merge* it to the exists headers object
+            // instead of blindly rewriting it.
+            for (var c in config) {
+                if (config.hasOwnProperty(c)) {
+                    if (c !== 'headers') {
+                        httpConfig[c] = config[c];
+                    } else {
+                        httpConfig.headers = httpConfig.headers || {};
+                        for (var h in config.headers) {
+                            if (config.headers.hasOwnProperty(h)) {
+                                httpConfig.headers[h] = config.headers[h];
+                            }
+                        }
+                    }
+                }
             }
 
             return httpConfig;
@@ -132,8 +152,8 @@ angular.module("girder.net", [])
          * Perform a POST http call to the given url with
          * the authentication Token if available.
          */
-        this.post = function (url, data) {
-            return $http(generateHttpConfig('POST', url, data));
+        this.post = function (url, data, config) {
+            return $http(generateHttpConfig('POST', url, data, config));
         };
 
         /**
@@ -187,4 +207,53 @@ angular.module("girder.net", [])
             return this.delete('folder/' + id);
         };
 
+        this.createItem = function (folderId, name, description) {
+            return this.post(['item', '?folderId=', folderId, '&name=', escape(name), '&description=', escape(description)].join(''));
+        };
+
+        this.uploadFile = function (parentType, parentId, file, opt) {
+            var that = this;
+
+            opt = opt || {};
+
+            // Create a new file.
+            //
+            // If the "name" parameter is given, use that for the filename;
+            // otherwise use the filename in the File object.
+            this.post(['file',
+                       '?parentType=', parentType,
+                       '&parentId=', parentId,
+                       '&name=', opt.name || file.name,
+                       '&size=', file.size,
+                       '&mimeType=', file.type].join(''))
+                .success(function (upload) {
+                    var formdata = new FormData();
+                    formdata.append('offset', 0);
+                    formdata.append('uploadId', upload._id);
+                    formdata.append('chunk', file);
+
+                    that.post('file/chunk', formdata, {
+                        transformRequest: angular.identity,
+                        headers: {
+                            'Content-Type': undefined
+                        }
+                    })
+                        .success(function (data) {
+                            console.log('file uploaded');
+                        })
+                        .error(function (data) {
+                            console.log(authToken);
+                            console.warn('could not upload data');
+                            console.warn(data);
+                        });
+                })
+                .error(function (data) {
+                    console.warn("Could not upload file");
+                    console.warn(data);
+                });
+        };
+
+        this.uploadFileItem = function (itemId, file, opt) {
+            this.uploadFile('item', itemId, file, opt);
+        };
     }]);
