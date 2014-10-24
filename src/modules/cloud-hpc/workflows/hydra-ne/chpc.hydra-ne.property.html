@@ -1,0 +1,69 @@
+<div class='form-group' ng-init="help[property.name]=false;">
+   <label class="col-sm-3 control-label" title="{{ property.help[0] }}">
+      {{ property.label }}
+   </label>
+   <div class="col-sm-9" ng-if="property.size == 1">
+      <input
+         ng-if="property.type !== 'enum'"
+         ng-focus="help[property.name]=true;"
+         ng-blur="help[property.name]=false;"
+         type="{{ (property.type === 'double') ? 'number' : 'text' }}"
+         value="{{ property.default }}"
+         min="{{ property.min }}"
+         class="form-control"/>
+
+      <select
+         ng-if="property.type === 'enum'"
+         ng-focus="help[property.name]=true;"
+         ng-blur="help[property.name]=false;"
+         class="form-control">
+         <option ng-repeat="item in property.enum.values" value="{{ item.value }}">{{ item.label }}</option>
+      </select>
+   </div>
+   <div class="col-sm-9">
+      <div class="row">
+         <div class="col-sm-4" ng-if="property.size == 3 || property.layout == '3x2'">
+            <input type="{{ (property.type === 'double') ? 'number' : 'text' }}"
+               class="form-control"
+               ng-focus="help[property.name]=true;"
+               ng-blur="help[property.name]=false;" />
+         </div>
+         <div class="col-sm-4" ng-if="property.size == 3 || property.layout == '3x2'">
+            <input type="{{ (property.type === 'double') ? 'number' : 'text' }}"
+               class="form-control"
+               ng-focus="help[property.name]=true;"
+               ng-blur="help[property.name]=false;" />
+         </div>
+         <div class="col-sm-4" ng-if="property.size == 3 || property.layout == '3x2'">
+            <input type="{{ (property.type === 'double') ? 'number' : 'text' }}"
+               class="form-control"
+               ng-focus="help[property.name]=true;"
+               ng-blur="help[property.name]=false;" />
+         </div>
+      </div>
+      <div class="row top-margin" ng-if="property.layout == '3x2'">
+         <div class="col-sm-4">
+            <input type="{{ (property.type === 'double') ? 'number' : 'text' }}"
+               class="form-control"
+               ng-focus="help[property.name]=true;"
+               ng-blur="help[property.name]=false;" />
+         </div>
+         <div class="col-sm-4">
+            <input type="{{ (property.type === 'double') ? 'number' : 'text' }}"
+               class="form-control"
+               ng-focus="help[property.name]=true;"
+               ng-blur="help[property.name]=false;" />
+         </div>
+         <div class="col-sm-4">
+            <input type="{{ (property.type === 'double') ? 'number' : 'text' }}"
+               class="form-control"
+               ng-focus="help[property.name]=true;"
+               ng-blur="help[property.name]=false;" />
+         </div>
+      </div>
+   </div>
+
+   <div class="help col-sm-offset-3 col-sm-9" ng-show='help[property.name]'>
+      {{ property.help[property.help.length - 1] }}
+   </div>
+</div>

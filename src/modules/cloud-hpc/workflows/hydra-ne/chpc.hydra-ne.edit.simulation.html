@@ -1,30 +1,40 @@
 <div class="navigation">
-   <div class="bs-docs-sidebar affix">
+   <div class="affix">
       <ul class="nav">
-         <li class="active" ng-click="activate('mat')">Materials</li>
-         <li ng-click="activate('source')">Source Terms</li>
-         <li ng-click="activate('exec')">Execution</li>
-         <li ng-click="activate('def')">Problem Definition</li>
-         <li ng-click="activate('solv')">Solvers</li>
-         <li ng-click="activate('stat')">Statistics</li>
-         <li ng-click="activate('boundCond')">Boundary Conditions</li>
-         <li ng-click="activate('func')">Functions</li>
+        <li ng-repeat="view in inputTemplate.views"
+            ng-class="{ active: (activeSection == view.id) }"
+            ng-click="activate(view.id)">
+            <i class="fa fa-fw" ng-class="getClassIcon(view.id)"></i>
+            {{ view.label }}
+        </li>
       </ul>
    </div>
 </div>
 
-<div class='body' ng-if="activeSection == 'mat'">
-   Mat content
+<div class='body container'
+  ng-repeat="view in inputTemplate.views"
+  ng-if="activeSection == view.id">
+  <div ng-repeat="attr in view.attributes" ng-class="{ collapsed: inputTemplate.definitions[attr].collapsed }">
+      <b ng-click="inputTemplate.definitions[attr].collapsed = !inputTemplate.definitions[attr].collapsed;">
+        <i class="fa fa-lg fa-fw" ng-class="{ 'fa-caret-down' : !inputTemplate.definitions[attr].collapsed, 'fa-caret-right': inputTemplate.definitions[attr].collapsed }"></i>
+        {{ inputTemplate.definitions[attr].label }}
+      </b>
+      <hr/>
+      <form class="form-horizontal" role="form">
+        <div class="collapsable" input-parameter ng-repeat="param in inputTemplate.definitions[attr].parameters" property="param"></div>
+      </form>
+  </div>
+
+  <div class="body-navigation">
+    <i class="fa fa-lg fa-fw fa-chevron-left"
+      ng-hide="$first" ng-click="activate(inputTemplate.views[$index - 1].id)">
+    </i>
+    <i class="fa fa-lg fa-fw" ng-class="getClassIcon(view.id)"
+      ng-click="validate(view.id)" class="btn btn-default">
+    </i>
+    <i class="fa fa-lg fa-fw fa-chevron-right"
+      ng-hide="$last" ng-click="activate(inputTemplate.views[$index + 1].id)">
+    </i>
+  </div>
 </div>
 
-<div class='body' ng-if="activeSection == 'source'">
-   source content
-</div>
-
-<div class='body' ng-if="activeSection == 'exec'">
-   Exec content
-</div>
-
-<div class='body' ng-if="activeSection == 'def'">
-   definition content
-</div>
