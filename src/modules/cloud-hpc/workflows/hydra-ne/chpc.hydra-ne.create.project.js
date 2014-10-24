@@ -16,9 +16,7 @@ angular.module('chpc.workflow.hydra-ne')
             .success(function (folder) {
                 $girder.createItem(folder._id, "mesh", "Mesh file used for simulation")
                     .success(function (item) {
-                        $girder.uploadFileItem(item._id, $scope.form.mesh, {
-                            name: "mesh.dat"
-                        });
+                        $girder.uploadFileItem(item._id, $scope.form.mesh);
                     })
                     .error(function (data) {
                         console.warn('Could not create mesh item');
