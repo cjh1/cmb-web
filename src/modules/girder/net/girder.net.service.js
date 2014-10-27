@@ -211,6 +211,20 @@ angular.module("girder.net", [])
             return this.post(['item', '?folderId=', folderId, '&name=', escape(name), '&description=', escape(description)].join(''));
         };
 
+        this.uploadChunk = function (uploadId, offset, blob) {
+            var formdata = new FormData();
+            formdata.append('offset', offset);
+            formdata.append('uploadId', uploadId);
+            formdata.append('chunk', blob);
+
+            return this.post('file/chunk', formdata, {
+                transformRequest: angular.identity,
+                headers: {
+                    'Content-Type': undefined
+                }
+            });
+        };
+
         this.uploadFile = function (parentType, parentId, file, opt) {
             var that = this;
 
@@ -227,17 +241,7 @@ angular.module("girder.net", [])
                        '&size=', file.size,
                        '&mimeType=', file.type].join(''))
                 .success(function (upload) {
-                    var formdata = new FormData();
-                    formdata.append('offset', 0);
-                    formdata.append('uploadId', upload._id);
-                    formdata.append('chunk', file);
-
-                    that.post('file/chunk', formdata, {
-                        transformRequest: angular.identity,
-                        headers: {
-                            'Content-Type': undefined
-                        }
-                    })
+                    that.uploadChunk(upload._id, 0, file)
                         .success(function (data) {
                             console.log('file uploaded');
                         })
