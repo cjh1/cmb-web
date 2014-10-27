@@ -47,6 +47,8 @@ Comments:
 |         listen       8888;
 |         server_name  localhost;
 |
+|         client_max_body_size 32M;
+|
 |         location / {
 |             proxy_pass http://localhost:3000;
 |         }

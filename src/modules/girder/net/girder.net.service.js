@@ -241,15 +241,41 @@ angular.module("girder.net", [])
                        '&size=', file.size,
                        '&mimeType=', file.type].join(''))
                 .success(function (upload) {
-                    that.uploadChunk(upload._id, 0, file)
-                        .success(function (data) {
-                            console.log('file uploaded');
-                        })
-                        .error(function (data) {
-                            console.log(authToken);
-                            console.warn('could not upload data');
-                            console.warn(data);
-                        });
+                    var chunkSize = 16*1024*1024,
+                        uploadNextChunk,
+                        i = 1,
+                        chunks = Math.floor(file.size / chunkSize);
+
+                    uploadNextChunk = function (offset) {
+                        var blob;
+
+                        if (offset + chunkSize >= file.size) {
+                            blob = file.slice(offset);
+                            that.uploadChunk(upload._id, offset, blob)
+                                .success(function (data) {
+                                    console.log('file uploaded');
+                                })
+                                .error(function (data) {
+                                    console.warn('could not upload data');
+                                    console.warn(data);
+                                });
+                        } else {
+                            blob = file.slice(offset, offset + chunkSize);
+                            console.log(blob.size);
+                            that.uploadChunk(upload._id, offset, blob)
+                                .success(function (data) {
+                                    console.log('chunk ' + i + ' of ' + chunks + ' uploaded');
+                                    i += 1;
+                                    uploadNextChunk(offset + chunkSize);
+                                })
+                                .error(function (data) {
+                                    console.warn('could not upload data');
+                                    console.warn(data);
+                                });
+                        }
+                    }
+
+                    uploadNextChunk(0);
                 })
                 .error(function (data) {
                     console.warn("Could not upload file");
