@@ -243,7 +243,7 @@ angular.module("girder.net", [])
                 .success(function (upload) {
                     var chunkSize = 16*1024*1024,
                         uploadNextChunk,
-                        i = 1,
+                        i = 0,
                         chunks = Math.floor(file.size / chunkSize);
 
                     uploadNextChunk = function (offset) {
@@ -261,11 +261,22 @@ angular.module("girder.net", [])
                                 });
                         } else {
                             blob = file.slice(offset, offset + chunkSize);
-                            console.log(blob.size);
                             that.uploadChunk(upload._id, offset, blob)
                                 .success(function (data) {
-                                    console.log('chunk ' + i + ' of ' + chunks + ' uploaded');
+                                    var msg;
+
                                     i += 1;
+                                    msg = 'chunk ' + i + ' of ' + chunks + ' uploaded';
+
+                                    console.log(msg);
+
+                                    $rootScope.$broadcast('notification-message', {
+                                        type: 'upload',
+                                        file: file.name,
+                                        done: i,
+                                        total: chunks
+                                    });
+
                                     uploadNextChunk(offset + chunkSize);
                                 })
                                 .error(function (data) {
@@ -273,7 +284,7 @@ angular.module("girder.net", [])
                                     console.warn(data);
                                 });
                         }
-                    }
+                    };
 
                     uploadNextChunk(0);
                 })
