@@ -5,7 +5,7 @@ angular.module('chpc.workflow.hydra-ne')
         template: $templateCache.get('cloud-hpc/workflows/hydra-ne/chpc.hydra-ne.project.html')
     };
 }])
-.controller('hydraNeProjectCtrl', [ '$scope', 'girder.net.GirderConnector', function ($scope, $girder) {
+.controller('hydraNeProjectCtrl', [ '$scope', 'girder.net.GirderConnector','$modal', '$templateCache', function ($scope, $girder, $modal, $templateCache) {
 
     function updateSimulations(parentId) {
         $girder.listItems(parentId)
@@ -32,8 +32,10 @@ angular.module('chpc.workflow.hydra-ne')
             var count = list.length;
             while(count--) {
                 if (list[count].name === 'simulations') {
+                    $scope.simulationsFolder = list[count];
                     updateSimulations(list[count]._id);
                 } else if (list[count].name === 'results') {
+                    $scope.resultsFolder = list[count];
                     updateResults(list[count]._id);
                 }
             }
@@ -42,10 +44,26 @@ angular.module('chpc.workflow.hydra-ne')
 
     $scope.openSimulation = function (simulationId) {
         console.log('open simulation ' + simulationId);
+        $scope.simulation = "Just to fill it and test the directive";
     };
 
     $scope.createSimulation = function () {
-        console.log('create simulation');
+        var modalInstance = $modal.open({
+            template: $templateCache.get('cloud-hpc/workflows/hydra-ne/chpc.hydra-ne.create.simulation.html'),
+            controller: 'HydraNeCreateSimulationCtrl',
+            size: 'lg',
+            resolve: {
+                parentId: function() {
+                    return $scope.simulationsFolder._id;
+                }
+            }
+        });
+
+        modalInstance.result.then(function(newSimulation) {
+            //
+            console.log('new simulation');
+            console.log(newSimulation);
+        });
     };
 
     $scope.deleteSimulation = function (simulationId) {

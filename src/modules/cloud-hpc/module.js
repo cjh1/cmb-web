@@ -24,6 +24,20 @@ angular.module('chpc',
                 });
             }
         };
+    }])
+    .directive("filemeta", [function () {
+        return {
+            scope: {
+                filemeta: "="
+            },
+            link: function (scope, element, attributes) {
+                element.bind("change", function (changeEvent) {
+                    scope.$apply(function () {
+                        scope.filemeta = changeEvent.target.files[0];
+                    });
+                });
+            }
+        };
     }]);
 
 angular.module('chpc.main',

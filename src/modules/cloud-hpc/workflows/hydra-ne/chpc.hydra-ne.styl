@@ -1,5 +1,55 @@
+color-green = #42D305
+color-red   = #D34205
+color-light   = #ccc
+
 hydra-ne-project
-    .project-title
-        position absolute
-        right 5px
-        top 3.25em
+   .project-title
+      position absolute
+      right 5px
+      top 3.25em
+
+   .edit-simulation
+      .navigation
+         margin-top 10px
+
+         .nav > li
+            display block
+            padding 4px 20px
+            font-size 13px
+            font-weight 500
+            color #999
+
+         .nav > li.active
+            color #000
+            font-weight 700
+
+         .green
+            color color-green
+
+         .red
+            color color-red
+
+      .body
+         margin-left 190px
+         padding-left 15px
+         border-left solid 1px color-light
+
+         hr
+            margin 0 0 10px 0
+
+         .collapsed .collapsable
+            display none
+
+         .form-group .row.top-margin
+            margin-top 10px
+
+         .body-navigation
+            position absolute
+            top 3.25em
+            right 10px
+
+            .green
+               color color-green
+
+            .red
+               color color-red

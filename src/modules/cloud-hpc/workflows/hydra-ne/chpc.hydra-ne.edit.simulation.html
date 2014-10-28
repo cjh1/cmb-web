@@ -1,0 +1,40 @@
+<div class="navigation">
+   <div class="affix">
+      <ul class="nav">
+        <li ng-repeat="view in inputTemplate.views"
+            ng-class="{ active: (activeSection == view.id) }"
+            ng-click="activate(view.id)">
+            <i class="fa fa-fw" ng-class="getClassIcon(view.id)"></i>
+            {{ view.label }}
+        </li>
+      </ul>
+   </div>
+</div>
+
+<div class='body container'
+  ng-repeat="view in inputTemplate.views"
+  ng-if="activeSection == view.id">
+  <div ng-repeat="attr in view.attributes" ng-class="{ collapsed: inputTemplate.definitions[attr].collapsed }">
+      <b ng-click="inputTemplate.definitions[attr].collapsed = !inputTemplate.definitions[attr].collapsed;">
+        <i class="fa fa-lg fa-fw" ng-class="{ 'fa-caret-down' : !inputTemplate.definitions[attr].collapsed, 'fa-caret-right': inputTemplate.definitions[attr].collapsed }"></i>
+        {{ inputTemplate.definitions[attr].label }}
+      </b>
+      <hr/>
+      <form class="form-horizontal" role="form">
+        <div class="collapsable" input-parameter ng-repeat="param in inputTemplate.definitions[attr].parameters" property="param"></div>
+      </form>
+  </div>
+
+  <div class="body-navigation">
+    <i class="fa fa-lg fa-fw fa-chevron-left"
+      ng-hide="$first" ng-click="activate(inputTemplate.views[$index - 1].id)">
+    </i>
+    <i class="fa fa-lg fa-fw" ng-class="getClassIcon(view.id)"
+      ng-click="validate(view.id)" class="btn btn-default">
+    </i>
+    <i class="fa fa-lg fa-fw fa-chevron-right"
+      ng-hide="$last" ng-click="activate(inputTemplate.views[$index + 1].id)">
+    </i>
+  </div>
+</div>
+

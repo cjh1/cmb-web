@@ -150,6 +150,7 @@ gulp.task('serve', ['watch'], function() {
     $.browserSync({
         server: {
             baseDir: "./dist"
-        }
+        },
+        notify: false
     });
 });

@@ -11,7 +11,7 @@
 Install system wide the following application
 
     $ brew install node
-    $ npm install -g gulp
+    $ npm install -g gulp bower
 
 Project specific configuration and setup
 
@@ -27,7 +27,7 @@ http://localhost:8888/
 
 Comments:
     By default, the configuration file is named nginx.conf and placed
-    in the directory /usr/local/nginx/conf, /etc/nginx, or /usr/local/etc/nginx.
+    in the directory /usr/local/nginx/conf, /etc/nginx, or /usr/local/etc/nginx/nginx.conf.
 
 | worker_processes  1;
 |
@@ -73,6 +73,31 @@ Comments:
 
 ## Girder initial structure
 ===========================
+
+OSX Side notes:
+
+    $ mkdir -p girder-data/asset-store girder-data/mongo-db
+    $ cd girder-data
+    $ sudo easy_install pip
+    $ sudo pip install virtualenv
+    $ virtualenv cmb-web
+    $ source cmb-web/bin/activate
+
+    emacs start-girder.sh
+
+    | mongod --dbpath /.../girder-data/mongo-db &
+    | cd /.../Girder/src
+    | /.../girder-data/cmb-web/bin/python -m girder
+
+    $ cd [...]/Girder
+    $ git clone https://github.com/girder/girder.git src
+    $ cd src
+    $ export PKG_CONFIG_PATH=/usr/local/Cellar/libffi/3.0.13/lib/pkgconfig
+    $ pip install -r requirements.txt
+    $ npm install -g grunt-cli
+    $ npm install
+    $ grunt init
+    $ grunt    
 
 Using the Girder interface a set of users, collections, folders and groups
 should be created.
