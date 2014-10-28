@@ -13,7 +13,9 @@ angular.module("girder.net", [])
 
         // Helper function use to generate $http argument base on
         // the targetted method and URL.
-        function generateHttpConfig (method, url, data) {
+        function generateHttpConfig (method, url, data, config) {
+            config = config || {};
+
             // Create basic request config
             var httpConfig = {
                 method: method,
@@ -27,6 +29,24 @@ angular.module("girder.net", [])
             // Add authentication token if available
             if (authToken) {
                 httpConfig.headers = { 'Girder-Token' : authToken };
+            }
+
+            // Add extra configuration directives if present.  If one of the
+            // options is "headers", *merge* it to the exists headers object
+            // instead of blindly rewriting it.
+            for (var c in config) {
+                if (config.hasOwnProperty(c)) {
+                    if (c !== 'headers') {
+                        httpConfig[c] = config[c];
+                    } else {
+                        httpConfig.headers = httpConfig.headers || {};
+                        for (var h in config.headers) {
+                            if (config.headers.hasOwnProperty(h)) {
+                                httpConfig.headers[h] = config.headers[h];
+                            }
+                        }
+                    }
+                }
             }
 
             return httpConfig;
@@ -132,8 +152,8 @@ angular.module("girder.net", [])
          * Perform a POST http call to the given url with
          * the authentication Token if available.
          */
-        this.post = function (url, data) {
-            return $http(generateHttpConfig('POST', url, data));
+        this.post = function (url, data, config) {
+            return $http(generateHttpConfig('POST', url, data, config));
         };
 
         /**
@@ -203,4 +223,88 @@ angular.module("girder.net", [])
             return promise;
         };
 
+        this.uploadChunk = function (uploadId, offset, blob) {
+            var formdata = new FormData();
+            formdata.append('offset', offset);
+            formdata.append('uploadId', uploadId);
+            formdata.append('chunk', blob);
+
+            return this.post('file/chunk', formdata, {
+                transformRequest: angular.identity,
+                headers: {
+                    'Content-Type': undefined
+                }
+            });
+        };
+
+        this.uploadFile = function (parentType, parentId, file, opt) {
+            var that = this;
+
+            opt = opt || {};
+
+            // Create a new file.
+            //
+            // If the "name" parameter is given, use that for the filename;
+            // otherwise use the filename in the File object.
+            this.post(['file',
+                       '?parentType=', parentType,
+                       '&parentId=', parentId,
+                       '&name=', opt.name || file.name,
+                       '&size=', file.size,
+                       '&mimeType=', file.type].join(''))
+                .success(function (upload) {
+                    var chunkSize = 16*1024*1024,
+                        uploadNextChunk,
+                        i = 0,
+                        chunks = Math.floor(file.size / chunkSize);
+
+                    uploadNextChunk = function (offset) {
+                        var blob;
+
+                        if (offset + chunkSize >= file.size) {
+                            blob = file.slice(offset);
+                            that.uploadChunk(upload._id, offset, blob)
+                                .success(function (data) {
+                                    console.log('file uploaded');
+                                })
+                                .error(function (data) {
+                                    console.warn('could not upload data');
+                                    console.warn(data);
+                                });
+                        } else {
+                            blob = file.slice(offset, offset + chunkSize);
+                            that.uploadChunk(upload._id, offset, blob)
+                                .success(function (data) {
+                                    var msg;
+
+                                    i += 1;
+                                    msg = 'chunk ' + i + ' of ' + chunks + ' uploaded';
+
+                                    $rootScope.$broadcast('notification-message', {
+                                        type: 'upload',
+                                        file: file.name,
+                                        done: i,
+                                        total: chunks
+                                    });
+
+                                    uploadNextChunk(offset + chunkSize);
+                                })
+                                .error(function (data) {
+                                    console.warn('could not upload data');
+                                    console.warn(data);
+                                });
+                        }
+                    };
+
+                    uploadNextChunk(0);
+                })
+                .error(function (data) {
+                    console.warn("Could not upload file");
+                    console.warn(data);
+                });
+        };
+
+        this.uploadFileItem = function (itemId, file, opt) {
+            this.uploadFile('item', itemId, file, opt);
+        };
     }]);
