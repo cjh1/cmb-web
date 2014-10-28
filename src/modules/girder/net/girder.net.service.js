@@ -268,8 +268,6 @@ angular.module("girder.net", [])
                                     i += 1;
                                     msg = 'chunk ' + i + ' of ' + chunks + ' uploaded';
 
-                                    console.log(msg);
-
                                     $rootScope.$broadcast('notification-message', {
                                         type: 'upload',
                                         file: file.name,
