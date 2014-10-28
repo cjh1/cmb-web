@@ -1,35 +1,4 @@
 angular.module('chpc.main')
-    .directive('notificationCenter', ['$templateCache', function ($templateCache) {
-        return {
-            controller: ['$scope', '$timeout', function ($scope, $timeout) {
-                var id = null;
-
-                $scope.message = '';
-                $scope.$on('notification-message', function (evt, message) {
-                    if (id) {
-                        $timeout.cancel(id);
-                    }
-
-                    $scope.message = message;
-
-                    id = $timeout(function () {
-                        $scope.message = null
-                    }, 3000);
-                });
-
-                $scope.percentage = function () {
-                    return 100 * $scope.message.done / $scope.message.total;
-                };
-
-                $scope.percentageInt = function () {
-                    return Math.floor($scope.percentage());
-                };
-            }],
-
-            //template: '<span ng-if="message">{{ message }}</span>'
-            template: $templateCache.get('cloud-hpc/notification.center.html')
-        };
-    }])
     /**
      * The chpc.main.RootController controller provide the root API
      * of the application workflow.
