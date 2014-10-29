@@ -1,4 +1,5 @@
 <div ng-if="message && message.type !== 'upload'" class="alert" ng-class="{'alert-danger': message.type === 'error', 'alert-info': message.type === 'info'}">
+    <button type="button" class="close" ng-click="hide()" data-dismiss="alert"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
     {{ message.message }}
 </div>
 
