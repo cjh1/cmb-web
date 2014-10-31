@@ -23,6 +23,18 @@ angular.module('chpc.workflow.hydra-ne')
                         console.warn(data);
                     });
 
+                $girder.createFolder(folder._id, "results", "Simulation results")
+                    .error(function (data) {
+                        console.warn('Could not create results folder');
+                        console.warn(data);
+                    });
+
+                $girder.createFolder(folder._id, "simulations", "Simulations")
+                    .error(function (data) {
+                        console.warn('Could not create simulations folder');
+                        console.warn(data);
+                    });
+
                 $modalInstance.close(folder);
             })
             .error(function (data, status, headers, config) {
