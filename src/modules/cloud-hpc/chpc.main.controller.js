@@ -149,26 +149,52 @@ angular.module('chpc.main')
         $scope.selectWorkflow = function (workflowName) {
             $scope.workflowType = workflowName;
 
-            $network.listWorkflowGroups($scope.workflows[workflowName]._id).success(function(groups) {
-                $scope.groups = groups;
-                var count = groups.length,
-                    array = groups,
-                    projectsMap = {},
-                    addGroupProjects = function (projects) {
-                        var list = projects,
-                            size = list.length;
-                        while(size--) {
-                            var project = list[size];
-                            projectsMap[project._id] = project;
-                        }
+            $network.listWorkflowGroups($scope.workflows[workflowName]._id).success(function (groups) {
+                    var process,
+                        found,
+                        i;
 
-                    };
+                process = function(groups) {
+                    $scope.groups = groups;
+                    var count = groups.length,
+                        array = groups,
+                        projectsMap = {},
+                        addGroupProjects = function (projects) {
+                            var list = projects,
+                                size = list.length;
+                            while(size--) {
+                                var project = list[size];
+                                projectsMap[project._id] = project;
+                            }
+                        };
 
-                while(count--) {
-                    $network.listFolders(array[count]._id).success(addGroupProjects);
+                    while(count--) {
+                        $network.listFolders(array[count]._id).success(addGroupProjects);
+                    }
+                    $scope.projects = projectsMap;
+                    $scope.updateNavigation('workflow');
+                };
+
+                // Look for a folder in this workflow with the same name as the
+                // user's login - this is the user's "My Projects" folder.  If
+                // it does not create it before rendering the projects view.
+                found = false;
+                for (i = 0; i < groups.length; i++) {
+                    if (groups[i].name === $scope.user.login) {
+                        found = true;
+                        break;
+                    }
                 }
-                $scope.projects = projectsMap;
-                $scope.updateNavigation('workflow');
+
+                if (!found) {
+                    $network.createFolder($scope.workflows[workflowName]._id, $scope.user.login, $scope.user.login + "'s projects", "collection")
+                        .success(function (folder) {
+                            $scope.groups = groups = groups.concat(folder);
+                            process(groups);
+                        });
+                } else {
+                    process(groups);
+                }
             });
         };
 

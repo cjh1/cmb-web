@@ -199,8 +199,9 @@ angular.module("girder.net", [])
             return this.get('item?folderId=' + parentId);
         };
 
-        this.createFolder = function (parentId, name, description) {
-            return this.post(['folder?parentId=', parentId, '&name=', escape(name), '&description=', escape(description)].join(''));
+        this.createFolder = function (parentId, name, description, parentType) {
+            parentType = parentType || "folder";
+            return this.post(['folder?parentId=', parentId, '&parentType=', parentType, '&name=', escape(name), '&description=', escape(description)].join(''));
         };
 
         this.deleteFolder = function (id) {
