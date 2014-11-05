@@ -52,6 +52,14 @@ angular.module("girder.net", [])
             return httpConfig;
         }
 
+        this.getApiBase = function () {
+            return apiBasePathURL;
+        };
+
+        this.getAuthToken = function () {
+            return authToken;
+        };
+
         /**
          * Change Girder API endpoint if need be.
          * The default value is '/api/v1/'
@@ -195,8 +203,12 @@ angular.module("girder.net", [])
          * Return a promise which should provide the list of available items
          * within a folder.
          */
-        this.listItems = function ( parentId ) {
-            return this.get('item?folderId=' + parentId);
+        this.listItems = function (parentId, name) {
+            return this.get('item?folderId=' + parentId + (name ? '&text=' + name : ''));
+        };
+
+        this.listItemFiles = function (itemId) {
+            return this.get('item/' + itemId + '/files');
         };
 
         this.createFolder = function (parentId, name, description, parentType) {
