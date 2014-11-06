@@ -5,7 +5,7 @@ angular.module('chpc.main')
             var id = null,
                 timeoutValue = 5000; // 5s
 
-            $scope.message = '';
+            $scope.message = null;
             $scope.$on('notification-message', function (evt, message) {
                 if (id) {
                     $timeout.cancel(id);
@@ -17,6 +17,10 @@ angular.module('chpc.main')
                     $scope.message = null;
                 }, timeoutValue);
             });
+
+            $scope.hide = function () {
+                $scope.message = null;
+            };
 
             $scope.percentage = function () {
                 return 100 * $scope.message.done / $scope.message.total;

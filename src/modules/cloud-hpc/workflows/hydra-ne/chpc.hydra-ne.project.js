@@ -27,6 +27,15 @@ angular.module('chpc.workflow.hydra-ne')
             });
     }
 
+    function updateMesh(mesh) {
+        $scope.mesh = mesh;
+        console.log($scope);
+    }
+
+    $scope.downloadLink = function () {
+        window.location.assign($girder.getApiBase() + 'file/' + $scope.mesh._id + '/download' + '?token=' + $girder.getAuthToken());
+    };
+
     $scope.loadSimulations = function() {
         $girder.listFolders($scope.project._id).success(function(list) {
             var count = list.length;
@@ -40,6 +49,26 @@ angular.module('chpc.workflow.hydra-ne')
                 }
             }
         });
+
+        $girder.listItems($scope.project._id, "mesh")
+            .success(function (items) {
+                if (items.length === 0) {
+                    console.error("no mesh item found");
+                }
+
+                $girder.listItemFiles(items[0]._id)
+                    .success(function (files) {
+                        var i;
+
+                        if (items.length === 0) {
+                            console.error("no mesh file found");
+                        } else if (items.length > 1) {
+                            console.error("multiple files found in mesh item");
+                        }
+
+                        updateMesh(files[0]);
+                    });
+            });
     };
 
     $scope.openSimulation = function (simulationId) {
@@ -73,4 +102,5 @@ angular.module('chpc.workflow.hydra-ne')
 
     $scope.results = [];
     $scope.simulations = [];
+    $scope.mesh = null;
 }]);

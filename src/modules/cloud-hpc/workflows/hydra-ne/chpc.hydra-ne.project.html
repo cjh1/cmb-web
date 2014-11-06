@@ -4,6 +4,39 @@
             {{ project.name }}
         </div>
 
+        <table>
+            <thead>
+                <tr>
+                    <th>
+                        <i class="fa fa-cubes fa-fw"></i>
+                        Mesh
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <b>File: </b> {{ mesh.name }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Size: </b> {{ mesh.size }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Created: </b> {{ mesh.created }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <a ng-click="downloadLink()">download</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
         <table class='table table-striped table-hover table-condensed'>
             <thead>
                 <tr>
