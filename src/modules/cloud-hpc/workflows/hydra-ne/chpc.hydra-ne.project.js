@@ -32,6 +32,95 @@ angular.module('chpc.workflow.hydra-ne')
         console.log($scope);
     }
 
+    var hex = "0123456789abcdef";
+
+    $scope.sampleJob = function () {
+        var name = "sample_cluster-";
+        for (var i = 0; i < 16; i++) {
+            name += hex[Math.floor(Math.random() * hex.length)];
+        }
+
+        $girder.post("item?folderId=" + $scope.resultsFolder._id + "&name=sample_job").success(function (folder) {
+            $girder.post("clusters", JSON.stringify({
+                config: [
+                    {
+                        _id: "546a6364192c142c7da87aea"
+                    }
+                ],
+                name: "sample_cluster-" + new Date().getTime(),
+                template: "default_cluster"
+            })).success(function (cluster) {
+                if (cluster.status !== "created") {
+                    console.warn(cluster);
+                    return;
+                }
+
+                console.log("Cluster '" + cluster.name + "' created");
+
+                $girder.post("jobs", JSON.stringify({
+                    onComplete: {
+                        cluster: "terminate"
+                    },
+                    input: [
+                        {
+                            itemId: $scope.meshItem._id,
+                            path: "input"
+                        }
+                    ],
+                    commands: [
+                        "echo 'hello dave'",
+                        "cp input/" + $scope.mesh.name + " mesh_copy.dat"
+                    ],
+                    name: "sample_job",
+                    output: {
+                        itemId: folder._id
+                    }
+                })).success(function (job) {
+                    if (job.status !== "created") {
+                        console.warn(job);
+                        return;
+                    }
+
+                    console.log("Job " + job.name + " created");
+
+                    $girder.put("clusters/" + cluster._id + "/start", JSON.stringify({
+                        onStart: {
+                            submitJob: job._id
+                        }
+                    })).success($scope.monitorJob(cluster, job));
+                });
+            }).error(function (data) {
+                console.warn(data);
+            });
+        });
+    };
+
+    $scope.monitorJob = function (cluster, job) {
+        return function () {
+            var count = 0,
+                delay = 3000;
+
+            $girder.get("clusters/" + cluster._id + "/status")
+                .success(function (response) {
+                    console.log(response);
+                    console.log("cluster status: " + response.status);
+                    count++;
+                    if (count === 2) {
+                        window.setTimeout($scope.monitorJob(cluster, job), delay);
+                    }
+                });
+
+            $girder.get("jobs/" + job._id + "/status")
+                .success(function (response) {
+                    console.log("job status: " + response.status);
+                    count++;
+                    if (count === 2) {
+                        window.setTimeout($scope.monitorJob(cluster, job), delay);
+                    }
+                });
+        };
+    };
+
     $scope.downloadLink = function () {
         window.location.assign($girder.getApiBase() + 'file/' + $scope.mesh._id + '/download' + '?token=' + $girder.getAuthToken());
     };
@@ -59,6 +148,8 @@ angular.module('chpc.workflow.hydra-ne')
                 $girder.listItemFiles(items[0]._id)
                     .success(function (files) {
                         var i;
+
+                        $scope.meshItem = items[0];
 
                         if (items.length === 0) {
                             console.error("no mesh file found");
