@@ -4,7 +4,10 @@ angular.module('chpc',
     // Helper filter
     .filter('toDateNumber', function() {
         return function(str) {
-            return new Date(str).getTime();
+            var day = str.split(' ')[0].split('-'),
+                time = str.split(' ')[1].split('.')[0].split(':'),
+                args = [].concat(day, time);
+            return new Date(args[0], args[1], args[2], args[3], args[4], args[5]).getTime();
         };
     })
     .directive("fileread", [function () {
