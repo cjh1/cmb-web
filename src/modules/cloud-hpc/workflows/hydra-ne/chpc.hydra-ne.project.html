@@ -4,40 +4,46 @@
             {{ project.name }}
         </div>
 
-        <table>
+        <table class='table table-striped table-hover table-condensed'>
             <thead>
                 <tr>
                     <th>
                         <i class="fa fa-cubes fa-fw"></i>
+                    </th>
+                    <th style='width: 20%;'>
                         Mesh
+                    </th>
+                    <th style='width: 55%;'>
+                    </th>
+                    <th style='width: 20%;'>
+                        <i class="fa fa-clock-o"></i>
+                    </th>
+                    <th class='text-center' colspan="2" style='width: 5%;'>
+                        <i class="fa fa-gears"></i>
                     </th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
+                    <td></td>
                     <td>
-                        <b>File: </b> {{ mesh.name }}
+                        {{ mesh.name }}
                     </td>
-                </tr>
-                <tr>
                     <td>
-                        <b>Size: </b> {{ mesh.size }}
+                        {{ mesh.size | bytes }}
                     </td>
-                </tr>
-                <tr>
                     <td>
-                        <b>Created: </b> {{ mesh.created }}
+                        {{ mesh.created | toDateNumber | date : 'medium' }}
                     </td>
-                </tr>
-                <tr>
                     <td>
-                        <a ng-click="downloadLink()">download</a>
+                        <i class="fa fa-cloud-download" ng-click="downloadLink()"></i>
+                    </td>
+                    <td>
+                        <i class="fa fa-eye" ng-click="sampleJob()"></i>
                     </td>
                 </tr>
             </tbody>
         </table>
-
-        <button class="btn btn-default" ng-click="sampleJob()">Run Sample Job</button>
 
         <table class='table table-striped table-hover table-condensed'>
             <thead>
@@ -48,9 +54,10 @@
                     <th style='width: 20%;'>
                         Simulations
                     </th>
-                    <th style='width: 60%;'></th>
-                    <th style='width: 20%;'></th>
-                    <th class='text-right' ng-click='createSimulation()'>
+                    <th style='width: 55%;'></th>
+                    <th style='width: 20%;'>
+                    </th>
+                    <th class='text-center' colspan="2" ng-click='createSimulation()' style='width: 5%;'>
                         <i class="fa fa-plus"></i>
                     </th>
                 </tr>
@@ -61,8 +68,11 @@
                     <td ng-click='openSimulation(simulation._id)'>{{ simulation.name }}</td>
                     <td ng-click='openSimulation(simulation._id)'>{{ simulation.description }}</td>
                     <td ng-click='openSimulation(simulation._id)'>{{ simulation.created | toDateNumber | date : 'medium' }}</td>
-                    <td class='text-right'>
+                    <td>
                         <i class='fa fa-fw fa-reply-all fa-rotate-180' ng-click='cloneSimulation(simulation._id)'></i>
+                    </td>
+                    <td>
+                        <i class="disabled fa fa-fw fa-trash-o" ng-if='simulation._accessLevel != 2'></i>
                         <i class='fa fa-fw fa-trash' ng-if='simulation._accessLevel == 2' ng-click='deleteSimulation(simulation._id)'></i>
                     </td>
                 </tr>
@@ -78,9 +88,11 @@
                     <th style='width: 20%;'>
                         Results
                     </th>
-                    <th style='width: 60%;'></th>
+                    <th style='width: 55%;'></th>
                     <th style='width: 20%;'></th>
-                    <th class='text-right'></th>
+                    <th class='text-center' colspan="2" style='width: 5%;'>
+                        <i class="fa fa-gears"></i>
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -89,8 +101,12 @@
                     <td ng-click='openResult(result._id)'>{{ result.name }}</td>
                     <td ng-click='openResult(result._id)'>{{ result.description }}</td>
                     <td ng-click='openResult(result._id)'>{{ result.created | toDateNumber | date : 'medium' }}</td>
-                    <td class='text-right' ng-click='deleteResult(result._id)'>
-                        <i class='fa fa-fw fa-trash' ng-if='result._accessLevel == 2' ></i>
+                    <td>
+                        <i class="fa fa-eye" ng-click="showResult()"></i>
+                    </td>
+                    <td>
+                        <i class="disabled fa fa-fw fa-trash-o" ng-if='simulation._accessLevel != 2'></i>
+                        <i class='fa fa-fw fa-trash' ng-if='simulation._accessLevel == 2' ng-click='deleteResult(result._id)'></i>
                     </td>
                 </tr>
             </tbody>
