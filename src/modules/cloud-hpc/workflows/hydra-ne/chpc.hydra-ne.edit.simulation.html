@@ -8,6 +8,38 @@
             {{ view.label }}
         </li>
       </ul>
+      <hr style="margin: 10px;"/>
+
+      <center>
+        <select style="width: 90%;">
+          <option cost=".175" value="r3.large">2 cores - 15 GB</option>
+          <option cost=".21" value="c3.xlarge">4 cores - 7 GB</option>
+          <option cost=".35" value="r3.xlarge">4 cores - 30 GB</option>
+          <option cost=".42" value="c3.2xlarge">8 cores - 15 GB</option>
+          <option cost=".7" value="r3.2xlarge">8 cores - 61 GB</option>
+          <option cost=".84" value="c3.4xlarge">16 cores - 30 GB</option>
+          <option cost="1.4" value="r3.4xlarge">16 cores - 122 GB</option>
+          <option cost="1.68" value="c3.8xlarge">32 cores - 60 GB</option>
+          <option cost="2.8" value="r3.8xlarge">32 cores - 244 GB</option>
+        </select>
+      </center>
+
+      <center>
+        <select style="width: 90%;">
+          <option>5 nodes</option>
+          <option>10 nodes</option>
+          <option>20 nodes</option>
+          <option>30 nodes</option>
+        </select>
+      </center>
+
+      <center ng-click="triggerSimulation()">
+        <span class="fa-stack">
+          <i class="fa fa-cloud fa-stack-2x text-primary"></i>
+          <i class="fa fa-arrow-right fa-stack-1x fa-inverse"></i>
+        </span>
+        Run in the cloud
+      </center>
    </div>
 </div>
 
@@ -16,7 +48,8 @@
   ng-if="activeSection == view.id">
   <div ng-repeat="attr in view.attributes" ng-class="{ collapsed: inputTemplate.definitions[attr].collapsed }">
       <b ng-click="inputTemplate.definitions[attr].collapsed = !inputTemplate.definitions[attr].collapsed;">
-        <i class="fa fa-lg fa-fw" ng-class="{ 'fa-caret-down' : !inputTemplate.definitions[attr].collapsed, 'fa-caret-right': inputTemplate.definitions[attr].collapsed }"></i>
+        <i class="fa fa-lg fa-fw"
+          ng-class="{ 'fa-caret-down' : !inputTemplate.definitions[attr].collapsed, 'fa-caret-right': inputTemplate.definitions[attr].collapsed }"></i>
         {{ inputTemplate.definitions[attr].label }}
       </b>
       <hr/>

@@ -10,6 +10,15 @@ angular.module('chpc',
             return new Date(args[0], args[1], args[2], args[3], args[4], args[5]).getTime();
         };
     })
+    .filter('bytes', function() {
+        return function(bytes, precision) {
+            if (isNaN(parseFloat(bytes)) || !isFinite(bytes)) return '-';
+            if (typeof precision === 'undefined') precision = 1;
+            var units = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'],
+                number = Math.floor(Math.log(bytes) / Math.log(1024));
+            return (bytes / Math.pow(1024, Math.floor(number))).toFixed(precision) +  ' ' + units[number];
+        };
+    })
     .directive("fileread", [function () {
         return {
             scope: {
