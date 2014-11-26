@@ -34,6 +34,12 @@ angular.module('chpc.workflow.hydra-ne')
 
     var hex = "0123456789abcdef";
 
+
+    $scope.viewMesh = function () {
+        $scope.meshViewer = true;
+    };
+
+    // FIXME: bind the button to viewMesh instead for now.
     $scope.sampleJob = function () {
         var name = "sample_cluster-";
         for (var i = 0; i < 16; i++) {
