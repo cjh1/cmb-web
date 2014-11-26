@@ -1,5 +1,5 @@
 <div ng-controller='hydraNeProjectCtrl' ng-init='loadSimulations()'>
-    <div ng-hide='simulation'>
+    <div ng-if='!(simulation || meshViewer)'>
         <div class='project-title'>
             {{ project.name }}
         </div>
@@ -39,7 +39,7 @@
                         <i class="fa fa-cloud-download" ng-click="downloadLink()"></i>
                     </td>
                     <td>
-                        <i class="fa fa-eye" ng-click="sampleJob()"></i>
+                        <i class="fa fa-eye" ng-click="viewMesh()"></i>
                     </td>
                 </tr>
             </tbody>
@@ -114,5 +114,8 @@
     </div>
 
     <div hydra-ne-simulation class='edit-simulation' ng-show="simulation" ng-controller="hydraNeEditSimulationCtrl">
+    </div>
+
+    <div hydra-ne-mesh-viewer ng-if="meshViewer">
     </div>
 </div>

@@ -67,7 +67,7 @@ gulp.task('partials', function () {
     .pipe($.size({title: "Partials"}));
 });
 
-gulp.task('html', ['process-css', 'process-js', 'partials', 'json'], function () {
+gulp.task('html', ['process-css', 'process-js', 'partials', 'json', 'vtkweb-js'], function () {
     return gulp.src('src/index.html')
         .pipe($.minifyHtml({
           empty: true,
@@ -125,6 +125,15 @@ gulp.task('bower-js', function () {
     .pipe($.size({title: "Bower js"}))
     .pipe(gulp.dest('dist/js'))
     // .pipe(assetMapping = $.rev.manifest())
+    ;
+});
+
+gulp.task('vtkweb-js', function () {
+  return gulp.src('src/assets/**/*')
+    .pipe($.filter('**/*.js'))
+    .pipe($.concat('vtk-web.js'))
+    .pipe($.uglify({preserveComments: $.uglifySaveLicense}))
+    .pipe(gulp.dest('dist/js'))
     ;
 });
 
