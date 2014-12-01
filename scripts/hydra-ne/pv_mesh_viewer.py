@@ -3,6 +3,7 @@ import os
 import tempfile
 import requests
 import atexit
+import sys
 
 # import paraview modules.
 from paraview.web import wamp      as pv_wamp
@@ -64,6 +65,10 @@ class _MeshViewer(pv_wamp.PVServerProtocol):
          'Girder-Token': _MeshViewer.token
       }
       r = requests.get(url, headers=headers)
+
+      if r.status_code != 200:
+          print >> sys.stderr, r.json()
+
       r.raise_for_status()
       mesh_file.write(r.content)
       mesh_file.close()
