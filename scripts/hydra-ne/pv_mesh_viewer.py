@@ -58,12 +58,22 @@ class _MeshViewer(pv_wamp.PVServerProtocol):
         # Update authentication key to use
         self.updateSecret(_MeshViewer.authKey)
 
+        _MeshViewer.meshFile = None
         # Process file onlu once
         if not _MeshViewer.faces:
-            self.processFile()
+            try:
+                self.processFile()
+            except:
+                if _MeshViewer.meshFile:
+                    os.remove(_MeshViewer.meshFile)
+                raise
 
     def _download_mesh_file(self):
+        def _cleanup():
+            os.remove(_MeshViewer.meshFile)
+
         mesh_file = tempfile.NamedTemporaryFile(suffix='.vtk', delete=False)
+        _MeshViewer.meshFile = mesh_file.name
         url = '%s/file/%s/download' % (_MeshViewer.url, _MeshViewer.meshFileId)
         headers = {
             'Girder-Token': _MeshViewer.token
@@ -76,11 +86,8 @@ class _MeshViewer(pv_wamp.PVServerProtocol):
         r.raise_for_status()
         mesh_file.write(r.content)
         mesh_file.close()
-        _MeshViewer.meshFile = mesh_file.name
 
         # register for cleanup
-        def _cleanup():
-            os.remove(_MeshViewer.meshFile)
 
         atexit.register(_cleanup)
 
