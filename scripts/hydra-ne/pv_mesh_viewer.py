@@ -1,5 +1,8 @@
 # import to process args
 import os
+import tempfile
+import requests
+import atexit
 
 # import paraview modules.
 from paraview.web import wamp      as pv_wamp
@@ -29,12 +32,17 @@ class _MeshViewer(pv_wamp.PVServerProtocol):
 
    @staticmethod
    def add_arguments(parser):
-      parser.add_argument("--mesh", default=None, help="Surface Mesh to load", dest="file")
+      parser.add_argument("--token", default=None, help="The Girder token for authentication", dest="token")
+      parser.add_argument("--url", default=None, help="The Girder base URL", dest="url")
+      parser.add_argument("--mesh", default=None, help="Surface Mesh file id to load", dest="file")
+
 
    @staticmethod
    def configure(args):
       _MeshViewer.authKey = args.authKey
-      _MeshViewer.meshFile = args.file
+      _MeshViewer.meshFileId = args.file
+      _MeshViewer.url = args.url
+      _MeshViewer.token = args.token
 
    def initialize(self):
       # Bring used components
@@ -49,7 +57,27 @@ class _MeshViewer(pv_wamp.PVServerProtocol):
       if not _MeshViewer.faces:
          self.processFile()
 
+   def _download_mesh_file(self):
+      mesh_file = tempfile.NamedTemporaryFile(suffix='.vtk', delete=False)
+      url = '%s/file/%s/download' % (_MeshViewer.url, _MeshViewer.meshFileId)
+      headers = {
+         'Girder-Token': _MeshViewer.token
+      }
+      r = requests.get(url, headers=headers)
+      r.raise_for_status()
+      mesh_file.write(r.content)
+      mesh_file.close()
+      _MeshViewer.meshFile = mesh_file.name
+
+      # register for cleanup
+      def _cleanup():
+          os.remove(_MeshViewer.meshFile)
+
+      atexit.register(_cleanup)
+
    def processFile(self):
+      self._download_mesh_file()
+
       reader = simple.OpenDataFile(_MeshViewer.meshFile)
       reader.UpdatePipeline()
 
