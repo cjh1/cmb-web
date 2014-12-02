@@ -5,7 +5,14 @@ var gulp = require('gulp'),
         pattern: ['gulp-*', 'main-bower-files', 'uglify-save-license', 'del', 'browser-sync', 'proxy']
     }),
     through = require('through2'),
-    path = require('path');
+    path = require('path'),
+    quickLogin = '';
+
+function fillQuickLogin(user, passwd) {
+    quickLogin += '<i class="fa fa-child clickable green" ng-click="login(USER, PASS)"></i>'
+        .replace(/USER/g, "'" + user + "'")
+        .replace(/PASS/g, "'" + passwd + "'");
+}
 
 function modify () {
     function transform(file, enc, callback) {
@@ -26,6 +33,13 @@ function modify () {
     return through.obj(transform);
 };
 
+gulp.task('dev', function() {
+    quickLogin = '';
+    fillQuickLogin('user001', 'user001001');
+    fillQuickLogin('user002', 'user002002');
+    fillQuickLogin('user003', 'user003003');
+});
+
 gulp.task('process-js', function() {
     return gulp.src(['src/modules/**/module.js', 'src/modules/**/*.js'])
         // .pipe($.debug({verbose: true}))
@@ -37,7 +51,7 @@ gulp.task('process-js', function() {
         .pipe($.uglify())
         .pipe($.sourcemaps.write())
         .pipe(gulp.dest('dist/js'))
-        .pipe($.size({title: "JS"}));;
+        .pipe($.size({title: "JS"}));
 });
 
 gulp.task('process-css', function() {
@@ -48,11 +62,12 @@ gulp.task('process-css', function() {
         .pipe($.autoprefixer())
         .pipe($.csso())
         .pipe(gulp.dest('dist/css'))
-        .pipe($.size({title: "CSS"}));;
+        .pipe($.size({title: "CSS"}));
 });
 
 gulp.task('partials', function () {
   return gulp.src('src/modules/**/*.html')
+    .pipe($.template({ quickLogin: quickLogin }))
     .pipe($.minifyHtml({
       empty: true,
       spare: true,
@@ -138,7 +153,7 @@ gulp.task('vtkweb-js', function () {
 });
 
 gulp.task('clean', function (cb) {
-    $.del(['dist'], cb);
+    return $.del(['dist'], cb);
 });
 
 gulp.task('default', ['clean'], function () {
@@ -146,6 +161,8 @@ gulp.task('default', ['clean'], function () {
 });
 
 gulp.task('build', ['html', 'images', 'bower-fonts', 'bower-js', 'bower-css']);
+
+gulp.task('build-dev', ['dev', 'build']);
 
 gulp.task('help', $.taskListing);
 
@@ -155,7 +172,22 @@ gulp.task('watch', ['build'] ,function () {
   gulp.watch('bower.json', ['bower-js', 'bower-css', 'bower-fonts', $.browserSync.reload]);
 });
 
+gulp.task('watch-dev', ['dev', 'build'] ,function () {
+  gulp.watch('src/**/*', ['html', $.browserSync.reload]);
+  gulp.watch('src/assets/images/**/*', ['images', $.browserSync.reload]);
+  gulp.watch('bower.json', ['bower-js', 'bower-css', 'bower-fonts', $.browserSync.reload]);
+});
+
 gulp.task('serve', ['watch'], function() {
+    $.browserSync({
+        server: {
+            baseDir: "./dist"
+        },
+        notify: false
+    });
+});
+
+gulp.task('serve-dev', ['watch-dev'], function() {
     $.browserSync({
         server: {
             baseDir: "./dist"
