@@ -220,6 +220,10 @@ angular.module("girder.net", [])
             return this.delete('folder/' + id);
         };
 
+        this.deleteItem = function (id) {
+            return this.delete('item/' + id);
+        };
+
         this.createItem = function (folderId, name, description, metadata) {
             var that = this,
                 promise = this.post(['item?folderId=', folderId, '&name=', escape(name), '&description=', escape(description)].join(''));
