@@ -1,5 +1,5 @@
 <div ng-controller='hydraNeProjectCtrl' ng-init='loadSimulations()'>
-    <div ng-if='!(simulation || meshViewer)'>
+    <div ng-if='!projectView'>
         <div class='project-title'>
             {{ project.name }}
         </div>
@@ -79,7 +79,7 @@
             </tbody>
         </table>
 
-        <table class='table table-striped table-hover table-condensed' ng-if='results.length > 1'>
+        <table class='table table-striped table-hover table-condensed' ng-if='results.length >= 1'>
             <thead>
                 <tr>
                     <th>
@@ -113,9 +113,16 @@
         </table>
     </div>
 
-    <div hydra-ne-simulation class='edit-simulation' ng-show="simulation" ng-controller="hydraNeEditSimulationCtrl">
+    <div class='edit-simulation'
+        hydra-ne-simulation
+        ng-show="projectView === 'simulation-input'"
+        ng-controller="hydraNeEditSimulationCtrl">
     </div>
 
-    <div hydra-ne-mesh-viewer ng-if="meshViewer">
+    <div
+        hydra-ne-mesh-viewer
+        ng-if="projectView === 'mesh-viewer'"
+        launcher-url="/paraview"
+        file-id="{{ mesh._id }}">
     </div>
 </div>

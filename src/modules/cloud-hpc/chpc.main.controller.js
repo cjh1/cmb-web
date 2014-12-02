@@ -32,6 +32,7 @@ angular.module('chpc.main')
             if(state === 'workflows') {
                 $scope.workflowType = 'default';
             }
+            $scope.$broadcast('navigation', state);
         };
 
         // Authentication / User handling -------------------------------------

@@ -2,21 +2,46 @@ angular.module('chpc.workflow.hydra-ne')
    .directive('hydraNeMeshViewer', ['$templateCache', function($templateCache) {
       return {
          restrict: 'A',
-         controller: ['$scope', function($scope) {
+         scope: {
+            launcherUrl: '@',
+            fileId: '@'
+         },
+         controller: ['$scope', 'girder.net.GirderConnector', function($scope, $girder) {
             var colorPalette = [
                "#76c9fb", "#7d85f8", "#8ff696", "#99b5ad", "#bfad71",
                "#fed50c", "#e8285d", "#fa4627", "#9c37fe", "#1353fe"
-            ],
-            session = null,
-            viewport = null;
+               ],
+               session = null,
+               autobahnConnection = null,
+               viewport = null;
 
             $scope.mainVisible = true;
             $scope.activeFace = 0;
             $scope.faces = [];
 
+            $scope.$on("$destroy", function() {
+               if(session) {
+                  var connectionToDelete = autobahnConnection;
+                  session.call('application.exit.later', [ 5 ]).then(function(){
+                     try {
+                        connectionToDelete.close();
+                     } catch (closeError) {
+                     };
+                  });
+                  session = null;
+                  autobahnConnection = null;
+               }
+            });
+
             $scope.connect = function (url) {
-               vtkWeb.smartConnect({ sessionURL: url },
+               vtkWeb.smartConnect({
+                     sessionManagerURL: url ,
+                     application: 'mesh-viewer',
+                     token: $girder.getAuthToken(),
+                     mesh: $scope.fileId
+                  },
                   function(connection) {
+                     autobahnConnection = connection.connection;
                      session = connection.session;
                      viewport = vtkWeb.createViewport({session:connection.session});
                      viewport.bind(".hydra-mesh-viewer .renderer");
@@ -27,11 +52,15 @@ angular.module('chpc.workflow.hydra-ne')
                      }
 
                      // Handle window resize
-                     $(window).resize(function() {
-                         if(viewport) {
-                             viewport.render();
-                         }
-                     }).trigger('resize');
+
+                        $(window).resize(function() {
+                           if(viewport) {
+                              try {
+                                 viewport.render();
+                              } catch(renderError) {
+                              }
+                           }
+                        }).trigger('resize');
 
                      // Update face list
                      session.call('extract.faces', []).then(function(names) {
@@ -90,8 +119,6 @@ angular.module('chpc.workflow.hydra-ne')
                   viewport.render();
                });
             };
-
-            console.log('mesh viewer activated');
          }],
          template: $templateCache.get('cloud-hpc/workflows/hydra-ne/chpc.hydra-ne.mesh.viewer.html')
        };

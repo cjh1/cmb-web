@@ -4,6 +4,9 @@ angular.module('chpc',
     // Helper filter
     .filter('toDateNumber', function() {
         return function(str) {
+            if(str === undefined) {
+                return 0;
+            }
             var day = str.split(' ')[0].split('-'),
                 time = str.split(' ')[1].split('.')[0].split(':'),
                 args = [].concat(day, time);

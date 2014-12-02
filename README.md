@@ -53,6 +53,10 @@ Comments:
 |             proxy_pass http://localhost:3000;
 |         }
 |
+|         location /paraview {
+|             proxy_pass http://localhost:8889/paraview;
+|         }
+|
 |         location /api/v1 {
 |             proxy_pass http://localhost:8080/api/v1;
 |         }
@@ -97,7 +101,7 @@ OSX Side notes:
     $ npm install -g grunt-cli
     $ npm install
     $ grunt init
-    $ grunt    
+    $ grunt
 
 Using the Girder interface a set of users, collections, folders and groups
 should be created.
