@@ -3,7 +3,7 @@ angular.module('chpc.main')
     return {
         controller: ['$scope', '$timeout', function ($scope, $timeout) {
             var id = null,
-                timeoutValue = 5000; // 5s
+                timeoutValue = 15000; // 15s
 
             $scope.message = null;
             $scope.$on('notification-message', function (evt, message) {

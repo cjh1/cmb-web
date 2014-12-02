@@ -271,6 +271,14 @@ angular.module("girder.net", [])
                         i = 0,
                         chunks = Math.floor(file.size / chunkSize);
 
+                    // Notify that upload started
+                    $rootScope.$broadcast('notification-message', {
+                        type: 'upload',
+                        file: file.name,
+                        done: 0,
+                        total: chunks
+                    });
+
                     uploadNextChunk = function (offset) {
                         var blob;
 
@@ -279,6 +287,7 @@ angular.module("girder.net", [])
                             that.uploadChunk(upload._id, offset, blob)
                                 .success(function (data) {
                                     $rootScope.$broadcast('file-uploaded', parentId, data);
+                                    $rootScope.$broadcast('notification-message', null);
                                 })
                                 .error(function (data) {
                                     console.warn('could not upload data');
