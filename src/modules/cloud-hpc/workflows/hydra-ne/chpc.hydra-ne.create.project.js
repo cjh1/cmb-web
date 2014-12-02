@@ -10,6 +10,11 @@ angular.module('chpc.workflow.hydra-ne')
     $scope.title = title;
     $scope.form = {group:group};
 
+    $scope.$on('file-uploaded', function(origin, uploadItem) {
+        console.log(uploadItem);
+        console.log('trigger post-processing of the mesh ' + uploadItem._id);
+    });
+
     $scope.ok = function () {
         // Create folder and item with mesh inside
         $girder.createFolder($scope.form.group, $scope.form.name, $scope.form.description)
