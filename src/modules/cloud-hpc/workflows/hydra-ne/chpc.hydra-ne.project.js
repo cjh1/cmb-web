@@ -27,8 +27,9 @@ angular.module('chpc.workflow.hydra-ne')
             });
     }
 
-    function updateMesh(mesh) {
+    function updateMesh(mesh, surfaceMesh) {
         $scope.mesh = mesh;
+        $scope.surfaceMesh = surfaceMesh;
     }
 
     var hex = "0123456789abcdef";
@@ -152,17 +153,20 @@ angular.module('chpc.workflow.hydra-ne')
 
                 $girder.listItemFiles(items[0]._id)
                     .success(function (files) {
-                        var i;
+                        var exoFile = null,
+                            vtkFile = null,
+                            count = files.length;
 
                         $scope.meshItem = items[0];
-
-                        if (items.length === 0) {
-                            console.error("no mesh file found");
-                        } else if (items.length > 1) {
-                            console.error("multiple files found in mesh item");
+                        while(count--) {
+                            if (files[count].exts[0] === 'exo') {
+                                exoFile = files[count];
+                            } else if (files[count].exts[0] === 'vtk') {
+                                vtkFile = files[count];
+                            }
                         }
 
-                        updateMesh(files[0]);
+                        updateMesh(exoFile, vtkFile);
                     });
             });
     };
