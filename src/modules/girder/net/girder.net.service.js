@@ -278,7 +278,7 @@ angular.module("girder.net", [])
                             blob = file.slice(offset);
                             that.uploadChunk(upload._id, offset, blob)
                                 .success(function (data) {
-                                    $rootScope.$broadcast('file-uploaded', parentId, upload);
+                                    $rootScope.$broadcast('file-uploaded', parentId, data);
                                 })
                                 .error(function (data) {
                                     console.warn('could not upload data');
