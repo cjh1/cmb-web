@@ -1,4 +1,4 @@
-<div ng-controller='hydraNeProjectCtrl' ng-init='loadSimulations()'>
+<div ng-controller='hydraNeProjectCtrl' ng-init='loadProjectData()'>
     <div ng-if='!projectView'>
         <div class='project-title'>
             {{ project.name }}
@@ -69,11 +69,10 @@
                     <td ng-click='openSimulation(simulation._id)'>{{ simulation.description }}</td>
                     <td ng-click='openSimulation(simulation._id)'>{{ simulation.created | toDateNumber | date : 'medium' }}</td>
                     <td>
-                        <i class='fa fa-fw fa-reply-all fa-rotate-180' ng-click='cloneSimulation(simulation._id)'></i>
+                        <i class='fa fa-fw fa-reply-all fa-rotate-180' ng-click='createSimulation(simulation._id)'></i>
                     </td>
                     <td>
-                        <i class="disabled fa fa-fw fa-trash-o" ng-if='simulation._accessLevel != 2'></i>
-                        <i class='fa fa-fw fa-trash' ng-if='simulation._accessLevel == 2' ng-click='deleteSimulation(simulation._id)'></i>
+                        <i class='fa fa-fw fa-trash' ng-click='deleteSimulation(simulation._id)'></i>
                     </td>
                 </tr>
             </tbody>

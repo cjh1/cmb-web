@@ -131,7 +131,7 @@ angular.module('chpc.workflow.hydra-ne')
         window.location.assign($girder.getApiBase() + 'file/' + $scope.mesh._id + '/download' + '?token=' + $girder.getAuthToken());
     };
 
-    $scope.loadSimulations = function() {
+    $scope.loadProjectData = function() {
         $girder.listFolders($scope.project._id).success(function(list) {
             var count = list.length;
             while(count--) {
@@ -172,11 +172,10 @@ angular.module('chpc.workflow.hydra-ne')
     };
 
     $scope.openSimulation = function (simulationId) {
-        console.log('open simulation ' + simulationId);
         $scope.projectView = "simulation-input";
     };
 
-    $scope.createSimulation = function () {
+    $scope.createSimulation = function (simToClone) {
         var modalInstance = $modal.open({
             template: $templateCache.get('cloud-hpc/workflows/hydra-ne/chpc.hydra-ne.create.simulation.html'),
             controller: 'HydraNeCreateSimulationCtrl',
@@ -189,20 +188,28 @@ angular.module('chpc.workflow.hydra-ne')
         });
 
         modalInstance.result.then(function(newSimulation) {
-            //
-            console.log('new simulation');
-            console.log(newSimulation);
+            updateSimulations($scope.simulationsFolder._id);
+
+            // Handle clone case
+            if(simToClone) {
+                console.log("Copy data over from cloning " + simToClone);
+            }
         });
     };
 
     $scope.deleteSimulation = function (simulationId) {
-        console.log('delete simulation ' + simulationId);
+        function update() {
+            updateSimulations($scope.simulationsFolder._id);
+        }
+
+        $girder.deleteItem(simulationId).success(update).error(update);
     };
 
     $scope.$on('navigation', function(origin, state) {
         if (state === 'project') {
             // Reset
             $scope.projectView = null;
+            $scope.loadProjectData();
         }
     });
 
