@@ -26,7 +26,7 @@ angular.module('chpc.workflow.hydra-ne')
                      try {
                         connectionToDelete.close();
                      } catch (closeError) {
-                     };
+                     }
                   });
                   session = null;
                   autobahnConnection = null;

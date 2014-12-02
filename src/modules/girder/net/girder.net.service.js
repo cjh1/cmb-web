@@ -230,9 +230,9 @@ angular.module("girder.net", [])
                 })
                 .error(function(){
                     console.log('Error while creating item');
-                    return promise; 
+                    return promise;
                 });
-            } 
+            }
             return promise;
         };
 
@@ -278,7 +278,7 @@ angular.module("girder.net", [])
                             blob = file.slice(offset);
                             that.uploadChunk(upload._id, offset, blob)
                                 .success(function (data) {
-                                    console.log('file uploaded');
+                                    $rootScope.$broadcast('file-uploaded', parentId, upload);
                                 })
                                 .error(function (data) {
                                     console.warn('could not upload data');
@@ -320,4 +320,29 @@ angular.module("girder.net", [])
         this.uploadFileItem = function (itemId, file, opt) {
             this.uploadFile('item', itemId, file, opt);
         };
+
+        // PUT /meshes/{mesh_file_id}/extract/surface
+        //
+        // Where mesh_file_id is the id of the file containing the mesh.
+        //
+        // The body of the request should have the following form:
+        //
+        // {
+        //   "output": {
+        //     "itemId": "The id of the item you what the output to be uploaded to",
+        //     "name": "The name to give the output file"
+        //   }
+        // }
+        this.processMesh = function(itemId, fileId) {
+          return this.put(
+            "meshes/" + fileId + "/extract/surface",
+            {
+              output: {
+                itemId: itemId,
+                name: 'mesh-faceset.vtk'
+              }
+            }
+          );
+        };
+
     }]);
