@@ -2,10 +2,10 @@ angular.module('chpc.main')
     /** The chpc.main.RootController controller provide the root API of the
      * application workflow.
      */
-     .controller('chpc.main.RootController', ['$scope', 'girder.net.GirderConnector', '$modal', '$templateCache', function ($scope, $network, $modal, $templateCache) {
+     .controller('chpc.main.RootController', ['$scope', 'girder.net.GirderConnector', '$modal', '$templateCache', function ($scope, $girder, $modal, $templateCache) {
 
         // First fetch our workflow definitions
-        $network.fetch('workflows.json').success(function (data) {
+        $girder.fetch('workflows.json').success(function (data) {
             $scope.workflowsMeta = data;
         });
 
@@ -68,14 +68,14 @@ angular.module('chpc.main')
          * Authenticate a given user
          */
         $scope.login = function (login, password) {
-            $network.login(login, password);
+            $girder.login(login, password);
         };
 
         /**
          * Switch to anonymous navigation
          */
         $scope.logout = function () {
-            $network.logout();
+            $girder.logout();
         };
 
         // Common workflow management -----------------------------------------
@@ -89,7 +89,7 @@ angular.module('chpc.main')
          * Fetch the list of workflows and update the global navigation
          */
         $scope.updateAndShowWorkflows = function () {
-            $network.listWorkflows().success(function(data) {
+            $girder.listWorkflows().success(function(data) {
                 $scope.workflows = {};
 
                 var array = data,
@@ -114,7 +114,7 @@ angular.module('chpc.main')
         $scope.selectWorkflow = function (workflowName) {
             $scope.workflowType = workflowName;
 
-            $network.listWorkflowGroups($scope.workflows[workflowName]._id).success(function (groups) {
+            $girder.listWorkflowGroups($scope.workflows[workflowName]._id).success(function (groups) {
                     var process,
                         found,
                         i;
@@ -134,7 +134,7 @@ angular.module('chpc.main')
                         };
 
                     while(count--) {
-                        $network.listFolders(array[count]._id).success(addGroupProjects);
+                        $girder.listFolders(array[count]._id).success(addGroupProjects);
                     }
                     $scope.projects = projectsMap;
                     $scope.updateNavigation('workflow');
@@ -152,7 +152,7 @@ angular.module('chpc.main')
                 }
 
                 if (!found) {
-                    $network.createFolder($scope.workflows[workflowName]._id, $scope.user.login, $scope.user.login + "'s projects", "collection")
+                    $girder.createFolder($scope.workflows[workflowName]._id, $scope.user.login, $scope.user.login + "'s projects", "collection")
                         .success(function (folder) {
                             $scope.groups = groups = groups.concat(folder);
                             process(groups);
@@ -198,11 +198,18 @@ angular.module('chpc.main')
          * Delete the given folder
          */
         $scope.deleteProject = function (projectId) {
-            $network.deleteFolder(projectId).success(function(){
-                console.log('Success');
+            $girder.deleteFolder(projectId).success(function(){
                 delete $scope.projects[projectId];
             }).error(function(data, status, config){
-                console.log('error');
+                console.log('error deleteProject');
             });
         };
+
+        $scope.$on('file-uploaded', function(origin, parentId, uploadItem) {
+            if ($scope.workflowType === 'hydra-ne') {
+                $girder.processMesh(parentId, uploadItem._id);
+            } else {
+                console.log('Upload file with workflow type = ' + $scope.workflowType);
+            }
+        });
      }]);
