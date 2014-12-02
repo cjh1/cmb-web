@@ -29,14 +29,13 @@ angular.module('chpc.workflow.hydra-ne')
 
     function updateMesh(mesh) {
         $scope.mesh = mesh;
-        console.log($scope);
     }
 
     var hex = "0123456789abcdef";
 
 
     $scope.viewMesh = function () {
-        $scope.meshViewer = true;
+        $scope.projectView = "mesh-viewer";
     };
 
     // FIXME: bind the button to viewMesh instead for now.
@@ -170,7 +169,7 @@ angular.module('chpc.workflow.hydra-ne')
 
     $scope.openSimulation = function (simulationId) {
         console.log('open simulation ' + simulationId);
-        $scope.simulation = "Just to fill it and test the directive";
+        $scope.projectView = "simulation-input";
     };
 
     $scope.createSimulation = function () {
@@ -196,6 +195,12 @@ angular.module('chpc.workflow.hydra-ne')
         console.log('delete simulation ' + simulationId);
     };
 
+    $scope.$on('navigation', function(origin, state) {
+        if (state === 'project') {
+            // Reset
+            $scope.projectView = null;
+        }
+    });
 
     $scope.results = [];
     $scope.simulations = [];
