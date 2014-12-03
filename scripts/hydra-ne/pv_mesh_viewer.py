@@ -96,6 +96,8 @@ class _MeshViewer(pv_wamp.PVServerProtocol):
 
         reader = simple.OpenDataFile(_MeshViewer.meshFile)
         reader.UpdatePipeline()
+        self.outline = simple.Show(reader)
+        self.outline.Representation = 'Outline'
 
         # Get information about cell data arrays
         nbFaces = 0
@@ -115,8 +117,8 @@ class _MeshViewer(pv_wamp.PVServerProtocol):
             rep = simple.Show(threshold)
             _MeshViewer.faces.append(rep)
 
-        view = simple.Render()
-        view.Background = [0, 0, 0]
+        self.view = simple.Render()
+        self.view.Background = [0, 0, 0]
 
     def convertToColor(self, colorStr):
         encoding = "0123456789abcdef"
@@ -132,6 +134,8 @@ class _MeshViewer(pv_wamp.PVServerProtocol):
         if index == -1:
             for rep in _MeshViewer.faces:
                 rep.Visibility = visible
+        elif index == -2:
+            self.outline.Visibility = visible
         else:
             _MeshViewer.faces[index].Visibility = visible
 
@@ -146,6 +150,20 @@ class _MeshViewer(pv_wamp.PVServerProtocol):
         for i in range(len(_MeshViewer.faces)):
             result.append("Face %d" % (i + 1))
         return result
+
+
+    @exportRpc('toggle.bg.color')
+    def changeBgColor(self):
+        # FIXME when we get the right face names
+        bgColor = self.view.Background[0]
+        bgColor = bgColor + 0.5
+        if bgColor > 1.0:
+            bgColor = 0
+        self.view.Background = [bgColor, bgColor, bgColor]
+        if bgColor == 1.0:
+            self.outline.AmbientColor = [0.0,0.0,0.0]
+        else:
+            self.outline.AmbientColor = [1.0,1.0,1.0]
 
 # =============================================================================
 # Main: Parse args and start server

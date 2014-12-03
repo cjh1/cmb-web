@@ -16,6 +16,7 @@ angular.module('chpc.workflow.hydra-ne')
                viewport = null;
 
             $scope.mainVisible = true;
+            $scope.outlineVisible = true;
             $scope.activeFace = 0;
             $scope.faces = [];
 
@@ -97,11 +98,29 @@ angular.module('chpc.workflow.hydra-ne')
                   session.call('toggle.visibility', [ -1, $scope.mainVisible ]).then(function(){
                      viewport.render();
                   });
+               } else if (index < 0) {
+                  // Toggle outline
+                  $scope.outlineVisible = !$scope.outlineVisible;
+                  session.call('toggle.visibility', [ -2, $scope.outlineVisible ]).then(function(){
+                     viewport.render();
+                  });
                } else {
                   $scope.faces[index].visible = !$scope.faces[index].visible;
                   session.call('toggle.visibility', [ index, $scope.faces[index].visible ]).then(function(){
                      viewport.render();
                   });
+               }
+            };
+
+            $scope.toggleBackgroundColor = function () {
+               session.call('toggle.bg.color', []).then(function(){
+                  viewport.render();
+               });
+            };
+
+            $scope.resetCamera = function () {
+               if(viewport) {
+                  viewport.resetCamera();
                }
             };
 
