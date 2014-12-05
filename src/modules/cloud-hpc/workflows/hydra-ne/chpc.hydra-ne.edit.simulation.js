@@ -35,14 +35,20 @@ angular.module('chpc.workflow.hydra-ne')
 
             // Download data model
             $girder.downloadContentFromItem($scope.item, 'input', function(content) {
-              $scope.dataValues = content;
+              $scope.dataValues = content || {};
             });
           };
 
           $scope.validate = function (sectionName) {
             sectionsStatus[sectionName] = 'complete';
             $girder.uploadContentToItem($scope.item, 'input', angular.toJson($scope.dataValues, true));
-            $girder.uploadContentToItem($scope.item, 'input-deck.txt', templates.hydraInputDeck({ data : $scope.dataValues }));
+            try {
+              var inputDeck = templates.hydraInputDeck({ data : $scope.dataValues });
+              $girder.uploadContentToItem($scope.item, 'input-deck.txt', inputDeck);
+            } catch (inputDeckError) {
+              console.log('error when generating input-deck');
+              console.log(inputDeckError);
+            }
           };
 
           $scope.getClassIcon = function (sectionName) {
