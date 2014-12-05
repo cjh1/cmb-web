@@ -92,6 +92,16 @@ gulp.task('html', ['process-css', 'process-js', 'partials', 'json', 'vtkweb-js']
         .pipe(gulp.dest('dist'));
 });
 
+
+gulp.task('jade', function() {
+  return gulp.src('./src/**/*.jade')
+    .pipe($.jade({client: true}))
+    .pipe(modify())
+    .pipe($.header('var templates = {}, jade = { escape: function(obj) { return obj; }};'))
+    .pipe($.concat('jade-templates.js'))
+    .pipe(gulp.dest('./dist/js'))
+});
+
 gulp.task('json', function () {
     return gulp.src('src/**/*.json')
         .pipe(gulp.dest('dist'));
@@ -144,9 +154,29 @@ gulp.task('bower-js', function () {
 });
 
 gulp.task('vtkweb-js', function () {
-  return gulp.src('src/assets/**/*')
-    .pipe($.filter('**/*.js'))
+  return gulp.src(['src/assets/**/vtkweb-all.min.js', 'src/assets/**/*.js'])
     .pipe($.concat('vtk-web.js'))
+    .pipe($.replace(/vtk-icon-bookmark-empty/g, 'fa-bookmark-o'))
+    .pipe($.replace(/vtk-icon-bookmark/g, 'fa fa-bookmark'))
+    .pipe($.replace(/'-empty'/g, "'-o'"))
+    .pipe($.replace(/<div class="pv-collapse-title pv-collapsable-action clickable"><span class="vtk-icon-plus-circled">NAME<\/span><\/div><div class="pv-no-collapse-title pv-collapsable-action clickable"><span class="vtk-icon-minus-circled pv-absolute-left">NAME<\/span>/g,
+          '<div class="pv-collapse-title pv-collapsable-action clickable"><span class="fa fa-fw fa-plus-circle"></span>NAME</div><div class="pv-no-collapse-title pv-collapsable-action clickable"><span class="pv-absolute-left"><i class="fa fa-fw fa-minus-circle"></i>NAME</span>'))
+    .pipe($.replace(/-circled/g, '-circle'))
+    .pipe($.replace(/vtk-icon-cancel/g, 'fa fa-close'))
+    .pipe($.replace(/vtk-icon-cancel-circle/g, 'fa fa-remove'))
+    .pipe($.replace(/vtk-icon-doc/g, 'fa fa-file-o'))
+    .pipe($.replace(/vtk-icon-doc-text/g, 'fa fa-file-text-o'))
+    .pipe($.replace(/vtk-icon-folder-empty/g, 'fa fa-folder-o'))
+    .pipe($.replace(/vtk-icon-help-circle/g, 'fa fa-info-circle'))
+    .pipe($.replace(/vtk-icon-minus-circle/g, 'fa fa-minus-circle'))
+    .pipe($.replace(/vtk-icon-ok/g, 'fa fa-check'))
+    .pipe($.replace(/vtk-icon-ok-circle/g, 'fa fa-check-circle-o'))
+    .pipe($.replace(/vtk-icon-play/g, 'fa fa-play'))
+    .pipe($.replace(/vtk-icon-plus/g, 'fa fa-plus'))
+    .pipe($.replace(/vtk-icon-plus-circle/g, 'fa fa-plus-circle'))
+    .pipe($.replace(/vtk-icon-resize-horizontal-1/g, 'fa fa-arrows-h'))
+    .pipe($.replace(/vtk-icon-tools/g, 'fa fa-plug'))
+    .pipe($.replace(/vtk-icon-trash/g, 'fa fa-trash-o'))
     .pipe($.uglify({preserveComments: $.uglifySaveLicense}))
     .pipe(gulp.dest('dist/js'))
     ;
@@ -160,20 +190,20 @@ gulp.task('default', ['clean'], function () {
     gulp.start('build');
 });
 
-gulp.task('build', ['html', 'images', 'bower-fonts', 'bower-js', 'bower-css']);
+gulp.task('build', ['jade', 'html', 'images', 'bower-fonts', 'bower-js', 'bower-css']);
 
 gulp.task('build-dev', ['dev', 'build']);
 
 gulp.task('help', $.taskListing);
 
 gulp.task('watch', ['build'] ,function () {
-  gulp.watch('src/**/*', ['html', $.browserSync.reload]);
+  gulp.watch('src/**/*', ['jade','html', $.browserSync.reload]);
   gulp.watch('src/assets/images/**/*', ['images', $.browserSync.reload]);
   gulp.watch('bower.json', ['bower-js', 'bower-css', 'bower-fonts', $.browserSync.reload]);
 });
 
 gulp.task('watch-dev', ['dev', 'build'] ,function () {
-  gulp.watch('src/**/*', ['html', $.browserSync.reload]);
+  gulp.watch('src/**/*', ['jade', 'html', $.browserSync.reload]);
   gulp.watch('src/assets/images/**/*', ['images', $.browserSync.reload]);
   gulp.watch('bower.json', ['bower-js', 'bower-css', 'bower-fonts', $.browserSync.reload]);
 });
