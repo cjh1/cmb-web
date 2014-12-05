@@ -1,4 +1,4 @@
-<div class="navigation">
+<div class="navigation" ng-init="initialize()">
    <div class="affix">
       <ul class="nav">
         <li ng-repeat="view in inputTemplate.views"
@@ -54,7 +54,10 @@
       </b>
       <hr/>
       <form class="form-horizontal" role="form">
-        <div class="collapsable" input-parameter ng-repeat="param in inputTemplate.definitions[attr].parameters" property="param"></div>
+        <div class="collapsable" input-parameter
+          ng-repeat="param in inputTemplate.definitions[attr].parameters"
+          property="param"
+          values="dataValues"></div>
       </form>
   </div>
 

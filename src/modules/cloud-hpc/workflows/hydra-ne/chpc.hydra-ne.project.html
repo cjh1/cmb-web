@@ -1,9 +1,11 @@
 <div ng-controller='hydraNeProjectCtrl' ng-init='loadProjectData()'>
+    <div class='project-title'>
+        {{ project.name }}
+    </div>
+    <div class="project-sub-title">
+        {{ subTitle }}
+    </div>
     <div ng-if='!projectView'>
-        <div class='project-title'>
-            {{ project.name }}
-        </div>
-
         <table class='table table-striped table-hover table-condensed'>
             <thead>
                 <tr>
@@ -101,7 +103,7 @@
                     <td ng-click='openResult(result._id)'>{{ result.description }}</td>
                     <td ng-click='openResult(result._id)'>{{ result.created | toDateNumber | date : 'medium' }}</td>
                     <td>
-                        <i class="fa fa-eye" ng-click="showResult()"></i>
+                        <i class="fa fa-eye" ng-click="showResult(result)"></i>
                     </td>
                     <td>
                         <i class="disabled fa fa-fw fa-trash-o" ng-if='simulation._accessLevel != 2'></i>
@@ -114,8 +116,8 @@
 
     <div class='edit-simulation'
         hydra-ne-simulation
-        ng-show="projectView === 'simulation-input'"
-        ng-controller="hydraNeEditSimulationCtrl">
+        ng-if="projectView === 'simulation-input'"
+        item="activeId">
     </div>
 
     <div
@@ -123,5 +125,12 @@
         ng-if="projectView === 'mesh-viewer' && surfaceMesh"
         launcher-url="/paraview"
         file-id="{{ surfaceMesh._id }}">
+    </div>
+
+    <div
+        hydra-ne-result-viewer
+        ng-if="projectView === 'result-viewer'"
+        launcher-url="/paraview"
+        item-id="{{ activeId }}">
     </div>
 </div>

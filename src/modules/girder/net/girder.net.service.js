@@ -211,6 +211,22 @@ angular.module("girder.net", [])
             return this.get('item/' + itemId + '/files');
         };
 
+        this.getFileId = function (itemId, fileName, callback) {
+            this.listItemFiles(itemId)
+                .success(function(files) {
+                    var count = files.length;
+                    while(count--) {
+                        if(files[count].name === fileName) {
+                            callback(files[count]._id);
+                            return;
+                        }
+                    }
+                    callback(undefined);
+                }).error(function() {
+                    callback(undefined);
+                });
+        };
+
         this.createFolder = function (parentId, name, description, parentType) {
             parentType = parentType || "folder";
             return this.post(['folder?parentId=', parentId, '&parentType=', parentType, '&name=', escape(name), '&description=', escape(description)].join(''));
@@ -332,6 +348,66 @@ angular.module("girder.net", [])
 
         this.uploadFileItem = function (itemId, file, opt) {
             this.uploadFile('item', itemId, file, opt);
+        };
+
+        this.uploadContentToItem = function (itemId, name, content) {
+            var self = this,
+                blob = new Blob([content], { type: "text/plain"});
+
+            function uploadFunction (upload) {
+                self.uploadChunk(upload._id, 0, blob)
+                    .success(function (data) {
+                        console.log("Upload ok");
+                    })
+                    .error(function (data) {
+                        console.warn('could not upload data');
+                        console.warn(data);
+                    });
+            }
+
+            function foundFileId (fileId) {
+                if(fileId) {
+                    self.put(['file/', fileId, '/contents',
+                               '?size=', content.length].join(''))
+                        .success(uploadFunction).error(function (data) {
+                            console.warn("Could not upload content");
+                            console.warn(data);
+                        });
+                } else {
+                    self.post(['file',
+                               '?parentType=item',
+                               '&parentId=', itemId,
+                               '&name=', name,
+                               '&size=', content.length,
+                               '&mimeType=txt/plain'].join(''))
+                        .success(uploadFunction).error(function (data) {
+                            console.warn("Could not upload content");
+                            console.warn(data);
+                        });
+                }
+            }
+
+            // Find  out if the file already exist
+            self.getFileId(itemId, name, foundFileId);
+        };
+
+        this.downloadContentFromItem = function (itemId, name, callback) {
+            var self = this;
+
+            function processFileId (fileId) {
+                if(fileId) {
+                    self.get(['file/', fileId, '/download/', name].join(''))
+                        .success(callback)
+                        .error(function(data) {
+                            console.warn("Error while downloading file content");
+                            console.warn(data);
+                        });
+                } else {
+                    callback(undefined);
+                }
+            }
+
+            self.getFileId(itemId, name, processFileId);
         };
 
         // PUT /meshes/{mesh_file_id}/extract/surface

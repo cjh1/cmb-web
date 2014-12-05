@@ -37,6 +37,13 @@ angular.module('chpc.workflow.hydra-ne')
 
     $scope.viewMesh = function () {
         $scope.projectView = "mesh-viewer";
+        $scope.subTitle = 'Mesh viewer: ' + $scope.mesh.name;
+    };
+
+    $scope.showResult = function (resultObj) {
+        $scope.projectView = "result-viewer";
+        $scope.subTitle = 'Result viewer ' + resultObj.name;
+        $scope.activeId = resultObj._id;
     };
 
     // FIXME: bind the button to viewMesh instead for now.
@@ -173,6 +180,13 @@ angular.module('chpc.workflow.hydra-ne')
 
     $scope.openSimulation = function (simulationId) {
         $scope.projectView = "simulation-input";
+        $scope.activeId = simulationId;
+        $scope.subTitle = null;
+        angular.forEach($scope.simulations, function(sim) {
+            if(sim._id === simulationId) {
+                $scope.subTitle = sim.name;
+            }
+        });
     };
 
     $scope.createSimulation = function (simToClone) {
@@ -192,7 +206,9 @@ angular.module('chpc.workflow.hydra-ne')
 
             // Handle clone case
             if(simToClone) {
-                console.log("Copy data over from cloning " + simToClone);
+                $girder.downloadContentFromItem(simToClone, 'input', function(content) {
+                    $girder.uploadContentToItem(newSimulation._id, 'input', angular.toJson(content, true));
+                });
             }
         });
     };
@@ -208,6 +224,7 @@ angular.module('chpc.workflow.hydra-ne')
     $scope.$on('navigation', function(origin, state) {
         if (state === 'project') {
             // Reset
+            $scope.subTitle = null;
             $scope.projectView = null;
             $scope.loadProjectData();
         }
