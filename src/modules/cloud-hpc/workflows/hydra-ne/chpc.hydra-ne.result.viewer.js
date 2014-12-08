@@ -25,13 +25,19 @@ angular.module('chpc.workflow.hydra-ne')
                }
             });
 
-            $scope.connect = function (url) {
-               vtkWeb.smartConnect({
-                     sessionManagerURL: url ,
-                     application: 'result-viewer',
-                     token: $girder.getAuthToken(),
-                     itemId: $scope.itemId
-                  },
+
+         $scope.connect = function (url) {
+               var configObject = {
+                  application: 'result-viewer',
+                  token: $girder.getAuthToken(),
+                  itemId: $scope.itemId
+               };
+               if(url.indexOf("ws") === 0) {
+                  configObject.sessionURL = url;
+               } else {
+                  configObject.sessionManagerURL = url;
+               }
+               vtkWeb.smartConnect(configObject,
                   function(connection) {
                      autobahnConnection = connection.connection;
                      session = connection.session;

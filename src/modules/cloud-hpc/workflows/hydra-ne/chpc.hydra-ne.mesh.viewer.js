@@ -35,12 +35,17 @@ angular.module('chpc.workflow.hydra-ne')
             });
 
             $scope.connect = function (url) {
-               vtkWeb.smartConnect({
-                     sessionManagerURL: url ,
-                     application: 'mesh-viewer',
-                     token: $girder.getAuthToken(),
-                     mesh: $scope.fileId
-                  },
+               var configObject = {
+                  application: 'mesh-viewer',
+                  token: $girder.getAuthToken(),
+                  mesh: $scope.fileId
+               };
+               if(url.indexOf("ws") === 0) {
+                  configObject.sessionURL = url;
+               } else {
+                  configObject.sessionManagerURL = url;
+               }
+               vtkWeb.smartConnect(configObject,
                   function(connection) {
                      autobahnConnection = connection.connection;
                      session = connection.session;
@@ -53,15 +58,14 @@ angular.module('chpc.workflow.hydra-ne')
                      }
 
                      // Handle window resize
-
-                        $(window).resize(function() {
-                           if(viewport) {
-                              try {
-                                 viewport.render();
-                              } catch(renderError) {
-                              }
+                     $(window).resize(function() {
+                        if(viewport) {
+                           try {
+                              viewport.render();
+                           } catch(renderError) {
                            }
-                        }).trigger('resize');
+                        }
+                     }).trigger('resize');
 
                      // Update face list
                      session.call('extract.faces', []).then(function(names) {

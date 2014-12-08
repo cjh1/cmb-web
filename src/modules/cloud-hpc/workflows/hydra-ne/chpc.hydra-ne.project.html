@@ -103,9 +103,20 @@
                     <td ng-click='openResult(result._id)'>{{ result.description }}</td>
                     <td ng-click='openResult(result._id)'>{{ result.created | toDateNumber | date : 'medium' }}</td>
                     <td>
-                        <i class="fa fa-eye" ng-click="showResult(result)"></i>
+                        <i class="fa" 
+                            ng-class="{ 'fa-eye': (result.meta.state === 'completed'), 'fa-jsfiddle': (result.meta.state !== 'completed') }" 
+                            ng-if="result.meta.task" 
+                            ng-click="showResult(result, result.meta.task)">
+                        </i>
+                        <i class="fa fa-cloud-upload" 
+                            ng-if="!result.meta.task" 
+                            ng-click="startTask(result, tasks.pvw)">
+                        </i>
                     </td>
-                    <td>
+                    <td ng-if="result.meta.task" ng-click='terminateTask(result, result.meta.task)'>
+                        <i class="fa fa-toggle-on"></i>
+                    </td>
+                    <td ng-if="!result.meta.task">
                         <i class="disabled fa fa-fw fa-trash-o" ng-if='simulation._accessLevel != 2'></i>
                         <i class='fa fa-fw fa-trash' ng-if='simulation._accessLevel == 2' ng-click='deleteResult(result._id)'></i>
                     </td>
@@ -130,7 +141,7 @@
     <div
         hydra-ne-result-viewer
         ng-if="projectView === 'result-viewer'"
-        launcher-url="/paraview"
+        launcher-url="{{ pvwURL }}"
         item-id="{{ activeId }}">
     </div>
 </div>

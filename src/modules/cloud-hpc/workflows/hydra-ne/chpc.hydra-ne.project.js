@@ -5,7 +5,35 @@ angular.module('chpc.workflow.hydra-ne')
         template: $templateCache.get('cloud-hpc/workflows/hydra-ne/chpc.hydra-ne.project.html')
     };
 }])
-.controller('hydraNeProjectCtrl', [ '$scope', 'girder.net.GirderConnector','$modal', '$templateCache', function ($scope, $girder, $modal, $templateCache) {
+.controller('hydraNeProjectCtrl', [ '$scope', 'girder.net.GirderConnector','$modal', '$templateCache', '$timeout', function ($scope, $girder, $modal, $templateCache, $timeout) {
+    var monitorList = [],
+        promise = null;
+
+    function registerItemForStatusMonitoring (item) {
+        monitorList.push(item);
+    }
+
+
+    function unregisterItemForStatusMonitoring (item) {
+        var idx = monitorList.indexOf(item);
+        if(idx !== -1) {
+            monitorList.splice(idx, 1);
+        }
+    }
+
+    function checkTasksStatus() {
+        var count = monitorList.length;
+        angular.forEach(monitorList, function(item) {
+            count--;
+            $girder.updateTaskStatus(item.meta.task, item);    
+
+            if(count === 0) {
+                promise = $timeout(checkTasksStatus, 2000); // 2s
+            }
+        });
+        
+    }
+    promise = $timeout(checkTasksStatus, 2000); // 2s
 
     function updateSimulations(parentId) {
         $girder.listItems(parentId)
@@ -40,10 +68,33 @@ angular.module('chpc.workflow.hydra-ne')
         $scope.subTitle = 'Mesh viewer: ' + $scope.mesh.name;
     };
 
-    $scope.showResult = function (resultObj) {
-        $scope.projectView = "result-viewer";
-        $scope.subTitle = 'Result viewer ' + resultObj.name;
-        $scope.activeId = resultObj._id;
+    $scope.showResult = function (resultObj, taskId) {
+        // FIXME
+        // === Launcher way
+        // $scope.projectView = "result-viewer";
+        // $scope.subTitle = 'Result viewer ' + resultObj.name;
+        // $scope.activeId = resultObj._id;
+        // $scope.pvwURL = '/paraview';
+        // === Cluster Way
+        $girder.getSessionURL(taskId, function(url) {
+            console.log("Try to connect to: " + url);
+            $scope.projectView = "result-viewer";
+            $scope.subTitle = 'Result viewer ' + resultObj.name;
+            $scope.activeId = resultObj._id;
+            $scope.pvwURL = url;
+        });
+    };
+
+    $scope.terminateTask = function (item, taskId) {
+        $girder.terminateTask(item, taskId);
+        delete item.meta.task;
+        unregisterItemForStatusMonitoring(item);
+    };
+
+    $scope.startTask = function (item, taskDefId) {
+        console.log('startTast ' + item._id + ' ' + taskDefId);
+        $girder.startTask(item, taskDefId);
+        registerItemForStatusMonitoring(item);
     };
 
     // FIXME: bind the button to viewMesh instead for now.
@@ -176,6 +227,12 @@ angular.module('chpc.workflow.hydra-ne')
                         updateMesh(exoFile, vtkFile);
                     });
             });
+
+        // Register task ids
+        $scope.tasks = {
+            pvw: $girder.getTaskId('hydra-ne', 'pvw'),
+            sim: $girder.getTaskId('hydra-ne', 'hydra-th')
+        };
     };
 
     $scope.openSimulation = function (simulationId) {
@@ -227,6 +284,12 @@ angular.module('chpc.workflow.hydra-ne')
             $scope.subTitle = null;
             $scope.projectView = null;
             $scope.loadProjectData();
+        }
+    });
+
+    $scope.$on('$destroy', function() {
+        if(promise) {
+            $timeout.cancel(promise);    
         }
     });
 
