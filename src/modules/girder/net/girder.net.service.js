@@ -494,6 +494,9 @@ angular.module("girder.net", [])
             // Create task instance
             self.post('tasks', { taskSpecId: taskDefId })
                 .success(function(response){
+                    if(item.meta === undefined || item.meta === null) {
+                        item.meta = {};
+                    }
                     // Update Item metadata
                     item.meta.task = response._id;
                     item.meta.spec = response.taskSpecId;
