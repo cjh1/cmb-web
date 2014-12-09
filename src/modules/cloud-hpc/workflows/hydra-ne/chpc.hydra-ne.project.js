@@ -30,14 +30,9 @@ angular.module('chpc.workflow.hydra-ne')
         console.log("checkTasksStatus " + count);
 
         angular.forEach(monitorList, function(item) {
-            count--;
             $girder.updateTaskStatus(item.meta.task, item);    
-
-            if(count === 0) {
-                promise = $timeout(checkTasksStatus, 2000); // 2s
-            }
         });
-        
+        promise = $timeout(checkTasksStatus, 2000); // 2s
     }
     promise = $timeout(checkTasksStatus, 2000); // 2s
 
