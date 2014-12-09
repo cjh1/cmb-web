@@ -504,7 +504,7 @@ angular.module("girder.net", [])
                     self.updateItemMetadata(item._id, item.meta);
 
                     // Start task
-                    self.put(['tasks', response._id, 'start'].join('/'), {
+                    self.put(['tasks', response._id, 'run'].join('/'), {
                         input: {
                             item: { id: item._id }, 
                             path: "data"
