@@ -508,6 +508,9 @@ angular.module("girder.net", [])
                         input: {
                             item: { id: item._id }, 
                             path: "data"
+                        },
+                        output: {
+                            item: { id: item._id }
                         }})
                         .success(function(){
                             console.log("Task successfully started");
