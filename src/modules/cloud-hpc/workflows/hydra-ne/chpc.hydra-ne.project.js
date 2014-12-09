@@ -10,11 +10,14 @@ angular.module('chpc.workflow.hydra-ne')
         promise = null;
 
     function registerItemForStatusMonitoring (item) {
+        console.log("registerItemForStatusMonitoring: ");
+        console.log(item);
         monitorList.push(item);
     }
 
 
     function unregisterItemForStatusMonitoring (item) {
+        console.log("unregisterItemForStatusMonitoring: " + item._id);
         var idx = monitorList.indexOf(item);
         if(idx !== -1) {
             monitorList.splice(idx, 1);
@@ -23,6 +26,9 @@ angular.module('chpc.workflow.hydra-ne')
 
     function checkTasksStatus() {
         var count = monitorList.length;
+
+        console.log("checkTasksStatus " + count);
+
         angular.forEach(monitorList, function(item) {
             count--;
             $girder.updateTaskStatus(item.meta.task, item);    
@@ -199,6 +205,9 @@ angular.module('chpc.workflow.hydra-ne')
                 } else if (list[count].name === 'results') {
                     $scope.resultsFolder = list[count];
                     updateResults(list[count]._id);
+                    if(list[count].meta && list[count].meta.task) {
+                        registerItemForStatusMonitoring(list[count]);
+                    }
                 }
             }
         });
