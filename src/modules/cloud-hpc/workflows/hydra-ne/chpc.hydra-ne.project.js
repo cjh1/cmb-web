@@ -97,8 +97,20 @@ angular.module('chpc.workflow.hydra-ne')
         // $scope.showResult(item, taskDefId);
         // === Cluster Way
         console.log('startTast ' + item._id + ' ' + taskDefId);
-        $girder.startTask(item, taskDefId);
-        registerItemForStatusMonitoring(item);
+
+        var modalInstance = $modal.open({
+            template: $templateCache.get('cloud-hpc/workflows/hydra-ne/chpc.hydra-ne.cluster.type.html'),
+            controller: 'HydraNeClusterTypeCtrl',
+            size: 'lg',
+            resolve: {}
+        });
+
+        modalInstance.result.then(function(cluster) {
+            console.log('got cluster');
+            console.log(cluster);
+            $girder.startTask(item, taskDefId, cluster.type, cluster.size);
+            registerItemForStatusMonitoring(item);
+        });
     };
 
     // FIXME: bind the button to viewMesh instead for now.
