@@ -104,7 +104,7 @@
                     <td ng-click='openResult(result._id)'>{{ result.created | toDateNumber | date : 'medium' }}</td>
                     <td>
                         <i class="fa"
-                            ng-class="{ 'fa-eye': (result.meta.status === 'completed'), 'fa-jsfiddle': (result.meta.status !== 'completed') }"
+                            ng-class="{ 'fa-eye': (result.meta.status === 'complete'), 'fa-jsfiddle': (result.meta.status !== 'complete') }"
                             ng-if="result.meta.task"
                             ng-click="showResult(result, result.meta.task)">
                         </i>
