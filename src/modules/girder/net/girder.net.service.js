@@ -549,6 +549,8 @@ angular.module("girder.net", [])
                 .error(function(error){
                     console.log("Error when deleting task " + taskId);
                     console.log(error);
+                    console.log(item);
+                    self.updateItemMetadata(item, {});
                 });
         };
 
