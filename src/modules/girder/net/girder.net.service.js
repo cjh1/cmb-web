@@ -537,25 +537,32 @@ angular.module("girder.net", [])
                 });
         };
 
+        this.deleteTask = function (item) {
+            var self = this,
+                taskId = item.meta.task;
+
+            self.delete(['tasks', taskId].join('/'))
+                .success(function(){
+                    // Remove item metadata
+                    self.updateItemMetadata(item, {});
+                })
+                .error(function(error){
+                    console.log("Error when deleting task " + taskId);
+                    console.log(error);
+                });
+        };
+
         this.terminateTask = function (item) {
             var self = this,
                 taskId = item.meta.task;
+
             // PUT /task/<_id from above>/terminate
             // DELETE /task/<_id from above>
             self.put(['tasks', taskId, 'terminate'].join('/'))
                 .success(function(){
-                    console.log("Termitate done on task " + taskId);
-                    // self.delete(['tasks', taskId].join('/'))
-                    //     .success(function(){
-                    //         console.log('Task successfully deleted');
-
-                    //         // Remove item metadata
-                    //         self.updateItemMetadata(item, {});
-                    //     })
-                    //     .error(function(error){
-                    //         console.log("Error when deleting task " + taskId);
-                    //         console.log(error);
-                    //     });
+                    var metadata = angular.copy(item.meta);
+                    metadata.status = 'terminate';
+                    self.updateItemMetadata(item, metadata);
                 })
                 .error(function(error) {
                     console.log("Error when terminating task " + taskId);

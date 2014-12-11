@@ -104,9 +104,9 @@
                     <td ng-click='openResult(result._id)'>{{ result.created | toDateNumber | date : 'medium' }}</td>
                     <td>
                         <i class="fa"
-                            ng-class="{ 'fa-eye': (result.meta.status === 'complete'), 'fa-jsfiddle': (result.meta.status !== 'complete') }"
+                            ng-class="{ 'fa-eye': (result.meta.status === 'complete'), 'fa-jsfiddle': (result.meta.status !== 'running') , 'fa-power-off': (result.meta.status !== 'terminate') }"
                             ng-if="result.meta.task"
-                            ng-click="showResult(result, result.meta.task)">
+                            ng-click="(result.meta.status === 'complete') ? showResult(result, result.meta.task) : null;">
                         </i>
                         <i class="fa fa-cloud-upload"
                             ng-if="!result.meta.task"

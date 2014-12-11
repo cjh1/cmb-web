@@ -13,6 +13,7 @@ angular.module('chpc.workflow.hydra-ne')
 
             $scope.$on("$destroy", function() {
                if(session) {
+                  console.log("close PVWeb client");
                   var connectionToDelete = autobahnConnection;
                   // session.call('application.exit.later', [ 5 ]).then(function(){
                      try {
@@ -22,6 +23,7 @@ angular.module('chpc.workflow.hydra-ne')
                   // });
                   session = null;
                   autobahnConnection = null;
+                  viewport = null;
                }
             });
 

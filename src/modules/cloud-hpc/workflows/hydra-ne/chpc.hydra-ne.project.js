@@ -22,11 +22,19 @@ angular.module('chpc.workflow.hydra-ne')
     function checkTasksStatus() {
         var gotTasks = false;
         angular.forEach(monitorList, function(item) {
-            $girder.updateTaskStatus(item);
-            gotTasks = true;
+            if(item.meta && item.meta.task) {
+                if(item.meta.status && item.meta.status === 'terminate') {
+                    $girder.deleteTask(item);
+                } else {
+                    $girder.updateTaskStatus(item);
+                    gotTasks = true;
+                }
+            } else {
+                unregisterItemForStatusMonitoring(item);
+            }
         });
         console.log('Check status ' + gotTasks);
-        promise = $timeout(checkTasksStatus, gotTasks ? 5000 : 10000); // 5s or 10s
+        promise = $timeout(checkTasksStatus, gotTasks ? 30000 : 2000); // 30s or 2s
     }
 
     function updateSimulations(parentId) {
@@ -81,7 +89,6 @@ angular.module('chpc.workflow.hydra-ne')
 
     $scope.terminateTask = function (item) {
         $girder.terminateTask(item);
-        unregisterItemForStatusMonitoring(item);
     };
 
     $scope.startTask = function (item, taskDefId) {
@@ -251,7 +258,7 @@ angular.module('chpc.workflow.hydra-ne')
         // Poll status update when needed
         if(promise === null) {
             console.log('start the auto check');
-            promise = $timeout(checkTasksStatus, 5000); // 5s
+            promise = $timeout(checkTasksStatus, 2000); // 2s
         } else {
             console.log('NO start the auto check');
         }
