@@ -470,23 +470,35 @@ angular.module("girder.net", [])
             console.log(taskList);
             if(workflow && taskName) {
                 return taskList[workflow][taskName];
-            }  
+            }
             return null;
         };
 
-        this.updateItemMetadata = function (itemId, metadata) {
-            return this.put(['item', itemId, 'metadata'].join('/'), metadata)
+        this.updateItemMetadata = function (item, metadata) {
+            return this.put(['item', item._id, 'metadata'].join('/'), metadata)
                 .success(function(){
+                    item.meta = metadata;
                     console.log('Success metadata updating');
                 }).error(function(){
                     console.log('Error when updating metadata');
                 });
         };
 
-        this.updateTaskStatus = function (taskId, sourceItem) {
-            this.get(['/tasks/', taskId, '/status'].join('')).success(function(response) {
-                sourceItem.meta.state = response.status;
-            });
+        this.updateTaskStatus = function (item) {
+            var self = this;
+
+            self.get(['tasks/', item.meta.task, '/status'].join(''))
+                .success(function(response) {
+                    if(item.meta.status !== response.status) {
+                        console.log('update status to ' + response.status);
+                        var meta = angular.copy(item.meta);
+                        meta.status = response.status;
+                        self.updateItemMetadata(item, meta);
+                    }
+                })
+                .error(function(resp){
+                    console.log('error when updating status');
+                });
         };
 
         this.startTask = function (item, taskDefId) {
@@ -494,19 +506,18 @@ angular.module("girder.net", [])
             // Create task instance
             self.post('tasks', { taskSpecId: taskDefId })
                 .success(function(response){
-                    if(item.meta === undefined || item.meta === null) {
-                        item.meta = {};
-                    }
                     // Update Item metadata
-                    item.meta.task = response._id;
-                    item.meta.spec = response.taskSpecId;
-                    item.meta.state = response.status;
-                    self.updateItemMetadata(item._id, item.meta);
+                    var metadata = {
+                        task: response._id,
+                        spec: response.taskSpecId,
+                        status: response.status
+                    };
+                    self.updateItemMetadata(item, metadata);
 
                     // Start task
                     self.put(['tasks', response._id, 'run'].join('/'), {
                         input: {
-                            item: { id: item._id }, 
+                            item: { id: item._id },
                             path: "data"
                         },
                         output: {
@@ -526,8 +537,9 @@ angular.module("girder.net", [])
                 });
         };
 
-        this.terminateTask = function (item, taskId) {
-            var self = this;
+        this.terminateTask = function (item) {
+            var self = this,
+                taskId = item.meta.task;
             // PUT /task/<_id from above>/terminate
             // DELETE /task/<_id from above>
             self.put(['tasks', taskId, 'terminate'].join('/'))
@@ -537,7 +549,7 @@ angular.module("girder.net", [])
                             console.log('Task successfully deleted');
 
                             // Remove item metadata
-                            self.updateItemMetadata(item._id, {});
+                            self.updateItemMetadata(item, {});
                         })
                         .error(function(error){
                             console.log("Error when deleting task " + taskId);
