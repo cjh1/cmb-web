@@ -115,7 +115,7 @@
                             ng-click="startTask(result, tasks.pvw)">
                         </i>
                     </td>
-                    <td ng-if="result.meta.task" ng-click='terminateTask(result)'>
+                    <td ng-if="result.meta.task && (result.meta.status !== 'terminate')" ng-click='terminateTask(result)'>
                         <i class="fa fa-toggle-on"></i>
                     </td>
                     <td ng-if="!result.meta.task">
