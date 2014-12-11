@@ -187,6 +187,19 @@ angular.module('chpc.workflow.hydra-ne')
     };
 
     $scope.loadProjectData = function() {
+        function checkItems(items) {
+            angular.forEach(items, checkItem);
+        }
+
+        // Check items inside results
+        function checkItem(item) {
+            if(item.meta && item.meta.task) {
+                console.log('About to register item');
+                console.log(item);
+                registerItemForStatusMonitoring(item);
+            }
+        }
+
         $girder.listFolders($scope.project._id).success(function(list) {
             var count = list.length,
                 self = this;
@@ -198,17 +211,8 @@ angular.module('chpc.workflow.hydra-ne')
                     $scope.resultsFolder = list[count];
                     updateResults(list[count]._id);
 
-                    // Check items inside results
-                    function checkItem(item) {
-                        if(item.meta && item.meta.task) {
-                            registerItemForStatusMonitoring(item);
-                        }
-                    }
-
                     $girder.listItems(list[count]._id)
-                        .success(function(items) {
-                            angular.forEach(items, checkItem);
-                        });
+                        .success(checkItems);
                 }
             }
         });
