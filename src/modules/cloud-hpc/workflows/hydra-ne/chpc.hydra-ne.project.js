@@ -199,13 +199,15 @@ angular.module('chpc.workflow.hydra-ne')
                     updateResults(list[count]._id);
 
                     // Check items inside results
+                    function checkItem(item) {
+                        if(item.meta && item.meta.task) {
+                            registerItemForStatusMonitoring(item);
+                        }
+                    }
+
                     $girder.listItems(list[count]._id)
                         .success(function(items) {
-                            angular.forEach(items, function(item) {
-                                if(item.meta && item.meta.task) {
-                                    registerItemForStatusMonitoring(item);
-                                }
-                            });
+                            angular.forEach(items, checkItem);
                         });
                 }
             }
