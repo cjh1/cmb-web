@@ -544,13 +544,17 @@ angular.module("girder.net", [])
             self.delete(['tasks', taskId].join('/'))
                 .success(function(){
                     // Remove item metadata
-                    self.updateItemMetadata(item, {});
+                    self.updateItemMetadata(item, {
+                        task: null, status: null, spec: null
+                    });
                 })
                 .error(function(error){
                     console.log("Error when deleting task " + taskId);
                     console.log(error);
                     console.log(item);
-                    self.updateItemMetadata(item, {});
+                    self.updateItemMetadata(item, {
+                        task: null, status: null, spec: null
+                    });
                 });
         };
 
