@@ -544,17 +544,18 @@ angular.module("girder.net", [])
             // DELETE /task/<_id from above>
             self.put(['tasks', taskId, 'terminate'].join('/'))
                 .success(function(){
-                    self.delete(['tasks', taskId].join('/'))
-                        .success(function(){
-                            console.log('Task successfully deleted');
+                    console.log("Termitate done on task " + taskId);
+                    // self.delete(['tasks', taskId].join('/'))
+                    //     .success(function(){
+                    //         console.log('Task successfully deleted');
 
-                            // Remove item metadata
-                            self.updateItemMetadata(item, {});
-                        })
-                        .error(function(error){
-                            console.log("Error when deleting task " + taskId);
-                            console.log(error);
-                        });
+                    //         // Remove item metadata
+                    //         self.updateItemMetadata(item, {});
+                    //     })
+                    //     .error(function(error){
+                    //         console.log("Error when deleting task " + taskId);
+                    //         console.log(error);
+                    //     });
                 })
                 .error(function(error) {
                     console.log("Error when terminating task " + taskId);

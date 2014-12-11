@@ -14,12 +14,12 @@ angular.module('chpc.workflow.hydra-ne')
             $scope.$on("$destroy", function() {
                if(session) {
                   var connectionToDelete = autobahnConnection;
-                  session.call('application.exit.later', [ 5 ]).then(function(){
+                  // session.call('application.exit.later', [ 5 ]).then(function(){
                      try {
                         connectionToDelete.close();
                      } catch (closeError) {
                      }
-                  });
+                  // });
                   session = null;
                   autobahnConnection = null;
                }
