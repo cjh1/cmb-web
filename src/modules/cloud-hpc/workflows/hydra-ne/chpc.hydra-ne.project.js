@@ -5,7 +5,37 @@ angular.module('chpc.workflow.hydra-ne')
         template: $templateCache.get('cloud-hpc/workflows/hydra-ne/chpc.hydra-ne.project.html')
     };
 }])
-.controller('hydraNeProjectCtrl', [ '$scope', 'girder.net.GirderConnector','$modal', '$templateCache', function ($scope, $girder, $modal, $templateCache) {
+.controller('hydraNeProjectCtrl', [ '$scope', 'girder.net.GirderConnector','$modal', '$templateCache', '$timeout', '$window', function ($scope, $girder, $modal, $templateCache, $timeout, $window) {
+    var monitorList = {},
+        promise = null;
+
+    function registerItemForStatusMonitoring (item) {
+        console.log('register for monitoring ' + item._id);
+        monitorList[item._id] = item;
+    }
+
+
+    function unregisterItemForStatusMonitoring (item) {
+        delete monitorList[item._id];
+    }
+
+    function checkTasksStatus() {
+        var gotTasks = false;
+        angular.forEach(monitorList, function(item) {
+            if(item.meta && item.meta.task) {
+                if(item.meta.status && item.meta.status === 'terminated') {
+                    $girder.deleteTask(item);
+                } else {
+                    $girder.updateTaskStatus(item);
+                    gotTasks = true;
+                }
+            } else {
+                unregisterItemForStatusMonitoring(item);
+            }
+        });
+        console.log('Check status ' + gotTasks);
+        promise = $timeout(checkTasksStatus, gotTasks ? 30000 : 2000); // 30s or 2s
+    }
 
     function updateSimulations(parentId) {
         $girder.listItems(parentId)
@@ -40,10 +70,47 @@ angular.module('chpc.workflow.hydra-ne')
         $scope.subTitle = 'Mesh viewer: ' + $scope.mesh.name;
     };
 
-    $scope.showResult = function (resultObj) {
-        $scope.projectView = "result-viewer";
-        $scope.subTitle = 'Result viewer ' + resultObj.name;
-        $scope.activeId = resultObj._id;
+    $scope.showResult = function (resultObj, taskId) {
+        // FIXME
+        // === Launcher way
+        // $scope.projectView = "result-viewer";
+        // $scope.subTitle = 'Result viewer ' + resultObj.name;
+        // $scope.activeId = resultObj._id;
+        // $scope.pvwURL = '/paraview';
+        // === Cluster Way
+        $girder.getSessionURL(taskId, function(url) {
+            console.log("Try to connect to: " + url);
+            $scope.projectView = "result-viewer";
+            $scope.subTitle = 'Result viewer ' + resultObj.name;
+            $scope.activeId = resultObj._id;
+            $scope.pvwURL = url;
+        });
+    };
+
+    $scope.terminateTask = function (item) {
+        $girder.terminateTask(item);
+    };
+
+    $scope.startTask = function (item, taskDefId) {
+        // FIXME
+        // === Launcher way
+        // $scope.showResult(item, taskDefId);
+        // === Cluster Way
+        console.log('startTast ' + item._id + ' ' + taskDefId);
+
+        var modalInstance = $modal.open({
+            template: $templateCache.get('cloud-hpc/workflows/hydra-ne/chpc.hydra-ne.cluster.type.html'),
+            controller: 'HydraNeClusterTypeCtrl',
+            size: 'lg',
+            resolve: {}
+        });
+
+        modalInstance.result.then(function(cluster) {
+            console.log('got cluster');
+            console.log(cluster);
+            $girder.startTask(item, taskDefId, cluster);
+            registerItemForStatusMonitoring(item);
+        });
     };
 
     // FIXME: bind the button to viewMesh instead for now.
@@ -135,12 +202,26 @@ angular.module('chpc.workflow.hydra-ne')
     };
 
     $scope.downloadLink = function () {
-        window.location.assign($girder.getApiBase() + 'file/' + $scope.mesh._id + '/download' + '?token=' + $girder.getAuthToken());
+        $window.location.assign($girder.getApiBase() + 'file/' + $scope.mesh._id + '/download' + '?token=' + $girder.getAuthToken());
     };
 
     $scope.loadProjectData = function() {
+        function checkItems(items) {
+            angular.forEach(items, checkItem);
+        }
+
+        // Check items inside results
+        function checkItem(item) {
+            if(item.meta && item.meta.task) {
+                console.log('About to register item');
+                console.log(item);
+                registerItemForStatusMonitoring(item);
+            }
+        }
+
         $girder.listFolders($scope.project._id).success(function(list) {
-            var count = list.length;
+            var count = list.length,
+                self = this;
             while(count--) {
                 if (list[count].name === 'simulations') {
                     $scope.simulationsFolder = list[count];
@@ -148,6 +229,9 @@ angular.module('chpc.workflow.hydra-ne')
                 } else if (list[count].name === 'results') {
                     $scope.resultsFolder = list[count];
                     updateResults(list[count]._id);
+
+                    $girder.listItems(list[count]._id)
+                        .success(checkItems);
                 }
             }
         });
@@ -176,6 +260,20 @@ angular.module('chpc.workflow.hydra-ne')
                         updateMesh(exoFile, vtkFile);
                     });
             });
+
+        // Register task ids
+        $scope.tasks = {
+            pvw: $girder.getTaskId('hydra-ne', 'pvw'),
+            sim: $girder.getTaskId('hydra-ne', 'hydra-th')
+        };
+
+        // Poll status update when needed
+        if(promise === null) {
+            console.log('start the auto check');
+            promise = $timeout(checkTasksStatus, 2000); // 2s
+        } else {
+            console.log('NO start the auto check');
+        }
     };
 
     $scope.openSimulation = function (simulationId) {
@@ -227,6 +325,12 @@ angular.module('chpc.workflow.hydra-ne')
             $scope.subTitle = null;
             $scope.projectView = null;
             $scope.loadProjectData();
+        }
+    });
+
+    $scope.$on('$destroy', function() {
+        if(promise) {
+            $timeout.cancel(promise);
         }
     });
 

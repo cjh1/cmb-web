@@ -21,6 +21,7 @@ angular.module('chpc.workflow.hydra-ne')
             $scope.faces = [];
 
             $scope.$on("$destroy", function() {
+               $(window).unbind('resize', render);
                if(session) {
                   var connectionToDelete = autobahnConnection;
                   session.call('application.exit.later', [ 5 ]).then(function(){
@@ -34,13 +35,27 @@ angular.module('chpc.workflow.hydra-ne')
                }
             });
 
+            function render () {
+               if(viewport) {
+                  try {
+                     viewport.render();
+                  } catch(renderError) {
+                  }
+               }
+            }
+
             $scope.connect = function (url) {
-               vtkWeb.smartConnect({
-                     sessionManagerURL: url ,
-                     application: 'mesh-viewer',
-                     token: $girder.getAuthToken(),
-                     mesh: $scope.fileId
-                  },
+               var configObject = {
+                  application: 'mesh-viewer',
+                  token: $girder.getAuthToken(),
+                  mesh: $scope.fileId
+               };
+               if(url.indexOf("ws") === 0) {
+                  configObject.sessionURL = url;
+               } else {
+                  configObject.sessionManagerURL = url;
+               }
+               vtkWeb.smartConnect(configObject,
                   function(connection) {
                      autobahnConnection = connection.connection;
                      session = connection.session;
@@ -53,15 +68,7 @@ angular.module('chpc.workflow.hydra-ne')
                      }
 
                      // Handle window resize
-
-                        $(window).resize(function() {
-                           if(viewport) {
-                              try {
-                                 viewport.render();
-                              } catch(renderError) {
-                              }
-                           }
-                        }).trigger('resize');
+                     $(window).bind('resize', render).trigger('resize');
 
                      // Update face list
                      session.call('extract.faces', []).then(function(names) {

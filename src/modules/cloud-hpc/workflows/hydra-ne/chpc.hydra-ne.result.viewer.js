@@ -13,25 +13,33 @@ angular.module('chpc.workflow.hydra-ne')
 
             $scope.$on("$destroy", function() {
                if(session) {
+                  console.log("close PVWeb client");
                   var connectionToDelete = autobahnConnection;
-                  session.call('application.exit.later', [ 5 ]).then(function(){
+                  // session.call('application.exit.later', [ 5 ]).then(function(){
                      try {
                         connectionToDelete.close();
                      } catch (closeError) {
                      }
-                  });
+                  // });
                   session = null;
                   autobahnConnection = null;
+                  viewport = null;
                }
             });
 
-            $scope.connect = function (url) {
-               vtkWeb.smartConnect({
-                     sessionManagerURL: url ,
-                     application: 'result-viewer',
-                     token: $girder.getAuthToken(),
-                     itemId: $scope.itemId
-                  },
+
+         $scope.connect = function (url) {
+               var configObject = {
+                  application: 'result-viewer',
+                  token: $girder.getAuthToken(),
+                  itemId: $scope.itemId
+               };
+               if(url.indexOf("ws") === 0) {
+                  configObject.sessionURL = url;
+               } else {
+                  configObject.sessionManagerURL = url;
+               }
+               vtkWeb.smartConnect(configObject,
                   function(connection) {
                      autobahnConnection = connection.connection;
                      session = connection.session;

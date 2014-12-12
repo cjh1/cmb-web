@@ -9,7 +9,8 @@ angular.module("girder.net", [])
         // Internal state
         var apiBasePathURL = '/api/v1/',
             user = null,
-            authToken = null;
+            authToken = null,
+            taskList = {};
 
         // Helper function use to generate $http argument base on
         // the targetted method and URL.
@@ -52,6 +53,34 @@ angular.module("girder.net", [])
             return httpConfig;
         }
 
+        this.fetchTaskList = function() {
+            var self = this;
+
+            self.listWorkflows()
+                .success(function(collections) {
+                    angular.forEach(collections, function(collection) {
+                        taskList[collection.name] = {};
+                        self.listFolders(collection._id, 'collection')
+                            .success(function(folders){
+                                angular.forEach(folders, function(folder) {
+                                    if (folder.name === 'tasks') {
+                                        self.listItems(folder._id)
+                                            .success(function(items) {
+                                                angular.forEach(items, function(item) {
+                                                    self.listItemFiles(item._id).success(function(files){
+                                                        angular.forEach(files, function(file) {
+                                                            taskList[collection.name][file.name] = file._id;
+                                                        });
+                                                    });
+                                                });
+                                            });
+                                    }
+                                });
+                            });
+                    });
+                });
+        };
+
         this.getApiBase = function () {
             return apiBasePathURL;
         };
@@ -77,7 +106,8 @@ angular.module("girder.net", [])
           *   - 'login-error'
           */
         this.login = function (login, password) {
-            var authString = $window.btoa(login + ':' + password);
+            var authString = $window.btoa(login + ':' + password),
+                self = this;
             $http({
                 method: 'GET',
                 url: apiBasePathURL + 'user/authentication',
@@ -89,6 +119,7 @@ angular.module("girder.net", [])
                 user = data.user;
                 authToken = data.authToken.token;
                 $rootScope.$broadcast('login', user);
+                self.fetchTaskList();
             })
             .error(function(data, status, headers, config) {
                 user = null;
@@ -195,8 +226,9 @@ angular.module("girder.net", [])
          * Return a promise which should provide the list of available folders
          * within a folder.
          */
-        this.listFolders = function ( parentId ) {
-            return this.get('folder?parentType=folder&parentId=' + parentId);
+        this.listFolders = function ( parentId, parentType ) {
+            parentType = parentType || "folder";
+            return this.get('folder?parentType='+parentType+'&parentId=' + parentId);
         };
 
         /**
@@ -432,6 +464,133 @@ angular.module("girder.net", [])
               }
             }
           );
+        };
+
+        this.getTaskId = function(workflow, taskName) {
+            console.log(taskList);
+            if(workflow && taskName) {
+                return taskList[workflow][taskName];
+            }
+            return null;
+        };
+
+        this.updateItemMetadata = function (item, metadata) {
+            return this.put(['item', item._id, 'metadata'].join('/'), metadata)
+                .success(function(){
+                    item.meta = metadata;
+                    console.log('Success metadata updating');
+                }).error(function(){
+                    console.log('Error when updating metadata');
+                });
+        };
+
+        this.updateTaskStatus = function (item) {
+            var self = this;
+
+            self.get(['tasks/', item.meta.task, '/status'].join(''))
+                .success(function(response) {
+                    if(item.meta.status !== response.status) {
+                        console.log('update status to ' + response.status);
+                        var meta = angular.copy(item.meta);
+                        meta.status = response.status;
+                        self.updateItemMetadata(item, meta);
+                    }
+                })
+                .error(function(resp){
+                    console.log('error when updating status');
+                });
+        };
+
+        this.startTask = function (item, taskDefId, cluster) {
+            var self = this;
+            // Create task instance
+            self.post('tasks', { taskSpecId: taskDefId })
+                .success(function(response){
+                    // Update Item metadata
+                    var metadata = {
+                        task: response._id,
+                        spec: response.taskSpecId,
+                        status: response.status
+                    };
+                    self.updateItemMetadata(item, metadata);
+
+                    // Start task
+                    self.put(['tasks', response._id, 'run'].join('/'), {
+                        cluster: {
+                            type: cluster.type,
+                            size: cluster.size,
+                            cores: cluster.cores
+                        },
+                        input: {
+                            item: { id: item._id },
+                            path: "data"
+                        },
+                        output: {
+                            item: { id: item._id }
+                        }})
+                        .success(function(){
+                            console.log("Task successfully started");
+                        })
+                        .error(function(error) {
+                            console.log("Error while starting Task");
+                            console.log(error);
+                        });
+                })
+                .error(function(error) {
+                    console.log("Error while task creation");
+                    console.log(error);
+                });
+        };
+
+        this.deleteTask = function (item) {
+            var self = this,
+                taskId = item.meta.task;
+
+            self.delete(['tasks', taskId].join('/'))
+                .success(function(){
+                    // Remove item metadata
+                    self.updateItemMetadata(item, {
+                        task: null, status: null, spec: null
+                    });
+                })
+                .error(function(error){
+                    console.log("Error when deleting task " + taskId);
+                    console.log(error);
+                    console.log(item);
+                    self.updateItemMetadata(item, {
+                        task: null, status: null, spec: null
+                    });
+                });
+        };
+
+        this.terminateTask = function (item) {
+            var self = this,
+                taskId = item.meta.task;
+
+            // PUT /task/<_id from above>/terminate
+            // DELETE /task/<_id from above>
+            self.put(['tasks', taskId, 'terminate'].join('/'))
+                .success(function(){
+                    var metadata = angular.copy(item.meta);
+                    metadata.status = 'terminated';
+                    self.updateItemMetadata(item, metadata);
+                })
+                .error(function(error) {
+                    console.log("Error when terminating task " + taskId);
+                    console.log(error);
+                });
+        };
+
+        this.getSessionURL = function (taskId, callback) {
+            this.get(['tasks', taskId].join('/'))
+                .success(function(resp){
+                    var sesssionId = resp.output.cluster._id + '%2F' + resp.output.pvw_job._id;
+                    callback( ( $window.location.protocol === 'https:' ? "wss://" : "ws://") + $window.location.host + "/proxy?sessionId=" + sesssionId);
+                })
+                .error(function(error){
+                    console.log("Error when fetching task info for " + taskId);
+                    console.log(error);
+                });
         };
 
     }]);
