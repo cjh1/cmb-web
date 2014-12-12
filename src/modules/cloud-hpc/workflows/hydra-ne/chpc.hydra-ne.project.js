@@ -108,7 +108,7 @@ angular.module('chpc.workflow.hydra-ne')
         modalInstance.result.then(function(cluster) {
             console.log('got cluster');
             console.log(cluster);
-            $girder.startTask(item, taskDefId, cluster.type, cluster.size);
+            $girder.startTask(item, taskDefId, cluster);
             registerItemForStatusMonitoring(item);
         });
     };

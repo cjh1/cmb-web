@@ -2,7 +2,7 @@ angular.module('chpc.workflow.hydra-ne')
 
 .controller('HydraNeClusterTypeCtrl', [ '$scope', '$modalInstance', 'girder.net.GirderConnector', function($scope, $modalInstance, $girder) {
 
-    $scope.cluster = { cost: 0 , size: 1, type: 'm3.medium' };
+    $scope.cluster = { cost: 0 , size: 1, type: 'm3.medium', cores: 1 };
     $scope.machines = [
         { "id": "m3.medium",    "label": "Basic Small",       "cpu": 1, "gpu": 0, "memory": 3.75, "cost": 0.07, "storage": [4] },
         { "id": "m3.large",     "label": "Basic Medium",      "cpu": 2, "gpu": 0, "memory": 7.5,  "cost": 0.14, "storage": [32] },
@@ -32,6 +32,7 @@ angular.module('chpc.workflow.hydra-ne')
         while(count--) {
             if(array[count].id === $scope.cluster.type) {
                cost = array[count].cost;
+               $scope.cluster.cores =  array[count].cpu;
             }
         }
 

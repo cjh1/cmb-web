@@ -501,7 +501,7 @@ angular.module("girder.net", [])
                 });
         };
 
-        this.startTask = function (item, taskDefId, clusterType, clusterSize) {
+        this.startTask = function (item, taskDefId, cluster) {
             var self = this;
             // Create task instance
             self.post('tasks', { taskSpecId: taskDefId })
@@ -517,8 +517,9 @@ angular.module("girder.net", [])
                     // Start task
                     self.put(['tasks', response._id, 'run'].join('/'), {
                         cluster: {
-                            type: clusterType,
-                            size: clusterSize
+                            type: cluster.type,
+                            size: cluster.size,
+                            cores: cluster.cores
                         },
                         input: {
                             item: { id: item._id },
