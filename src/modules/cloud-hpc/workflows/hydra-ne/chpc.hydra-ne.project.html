@@ -41,7 +41,7 @@
                         <i class="fa fa-cloud-download" ng-click="downloadLink()"></i>
                     </td>
                     <td>
-                        <i ng-if="surfaceMesh" class="fa fa-eye" ng-click="viewMesh()"></i>
+                        <i ng-if="mesh" class="fa fa-eye" ng-click="viewMesh()"></i>
                     </td>
                 </tr>
             </tbody>
@@ -135,9 +135,9 @@
 
     <div
         hydra-ne-mesh-viewer
-        ng-if="projectView === 'mesh-viewer' && surfaceMesh"
+        ng-if="projectView === 'mesh-viewer' && mesh"
         launcher-url="/paraview"
-        file-id="{{ surfaceMesh._id }}">
+        file-id="{{ mesh._id }}">
     </div>
 
     <div
