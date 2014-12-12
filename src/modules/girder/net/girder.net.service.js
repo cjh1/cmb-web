@@ -572,7 +572,7 @@ angular.module("girder.net", [])
             self.put(['tasks', taskId, 'terminate'].join('/'))
                 .success(function(){
                     var metadata = angular.copy(item.meta);
-                    metadata.status = 'terminate';
+                    metadata.status = 'terminated';
                     self.updateItemMetadata(item, metadata);
                 })
                 .error(function(error) {

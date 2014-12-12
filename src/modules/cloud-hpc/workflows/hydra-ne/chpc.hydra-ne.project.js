@@ -23,7 +23,7 @@ angular.module('chpc.workflow.hydra-ne')
         var gotTasks = false;
         angular.forEach(monitorList, function(item) {
             if(item.meta && item.meta.task) {
-                if(item.meta.status && item.meta.status === 'terminate') {
+                if(item.meta.status && item.meta.status === 'terminated') {
                     $girder.deleteTask(item);
                 } else {
                     $girder.updateTaskStatus(item);
