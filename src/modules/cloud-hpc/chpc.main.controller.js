@@ -204,12 +204,4 @@ angular.module('chpc.main')
                 console.log('error deleteProject');
             });
         };
-
-        $scope.$on('file-uploaded', function(origin, parentId, uploadItem) {
-            if ($scope.workflowType === 'hydra-ne') {
-                $girder.processMesh(parentId, uploadItem._id);
-            } else {
-                console.log('Upload file with workflow type = ' + $scope.workflowType);
-            }
-        });
      }]);
