@@ -33,6 +33,7 @@ angular.module('chpc.workflow.hydra-ne')
             if(array[count].id === $scope.cluster.type) {
                cost = array[count].cost;
                $scope.cluster.cores =  array[count].cpu;
+               $scope.cluster.gpu = array[count].gpu;
             }
         }
 

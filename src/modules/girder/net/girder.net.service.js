@@ -516,11 +516,7 @@ angular.module("girder.net", [])
 
                     // Start task
                     self.put(['tasks', response._id, 'run'].join('/'), {
-                        cluster: {
-                            type: cluster.type,
-                            size: cluster.size,
-                            cores: cluster.cores
-                        },
+                        cluster: cluster,
                         input: {
                             item: { id: item._id },
                             path: "data"
