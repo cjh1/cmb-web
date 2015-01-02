@@ -4,7 +4,8 @@
 </div>
 <div ng-hide="user">
     <input placeholder="Login" ng-model="ui.user.login" type="text"/>
-    <input placeholder="Password" ng-model="ui.user.password" type="password"/>
+    <input placeholder="Password" ng-model="ui.user.password" type="password"
+           chpc-enter="login(ui.user.login, ui.user.password)"/>
     <i class="fa fa-check clickable green" ng-click="login(ui.user.login, ui.user.password)"></i>
     <%= quickLogin %>
 </div>

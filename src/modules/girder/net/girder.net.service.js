@@ -164,6 +164,31 @@ angular.module("girder.net", [])
         };
 
         /**
+         * Fetch the currently logged in user from Girder using Girder-Token
+         */
+        this.fetchUser = function(token) {
+            var self = this;
+
+            $http({
+                method: 'GET',
+                url: apiBasePathURL + 'user/me',
+                headers: {
+                    'Girder-Token': token
+                }
+            })
+            .success(function(data, status, headers, config) {
+                user = data;
+                authToken = token;
+                $rootScope.$broadcast('login', user);
+                self.fetchTaskList();
+            })
+            .error(function(data, status, headers, config) {
+                user = null;
+                authToken = null;
+            });
+        };
+
+        /**
          * Perform a GET http call to the given url with
          * the authentication Token if available.
          */

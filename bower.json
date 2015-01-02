@@ -25,6 +25,7 @@
   "dependencies": {
     "angular-bootstrap": "~0.11.0",
     "angular": "1.2.27",
+    "angular-cookies": "1.2.27",
     "font-awesome": "4.2.0",
     "bootstrap-css-only": "3.2.0",
     "jquery": "~2.1.1",
