@@ -1,8 +1,8 @@
-angular.module('chpc.main')
+angular.module('chpc.main', ['ngCookies'])
     /** The chpc.main.RootController controller provide the root API of the
      * application workflow.
      */
-     .controller('chpc.main.RootController', ['$scope', 'girder.net.GirderConnector', '$modal', '$templateCache', function ($scope, $girder, $modal, $templateCache) {
+     .controller('chpc.main.RootController', ['$scope', 'girder.net.GirderConnector', '$modal', '$templateCache', '$cookies', function ($scope, $girder, $modal, $templateCache, $cookies) {
 
         // First fetch our workflow definitions
         $girder.fetch('workflows.json').success(function (data) {
@@ -204,4 +204,10 @@ angular.module('chpc.main')
                 console.log('error deleteProject');
             });
         };
+
+        // See if we are already have a cookie and thus a Girder session.
+        var girderToken = $cookies.girderToken;
+        if (girderToken) {
+            $girder.fetchUser(girderToken);
+        }
      }]);
